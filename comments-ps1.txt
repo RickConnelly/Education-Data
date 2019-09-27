@@ -1,0 +1,7 @@
+need to specify file extension for these! like .csv, .xlsx etc!!
+
+export excel using Education_Data // Exports file into an Excel document //
+
+export delimited using Education_Data // Exports file into delimited text //
+
+outfile using Education_Data // Exports file into a debased file //
