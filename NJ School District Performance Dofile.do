@@ -1,7 +1,9 @@
-*______________________________________________________________________________*
+******************************************************************
+*Please refer to heading to find specific problem sets, thank you*
+******************************************************************
 
-// Data Formats and Conversion Problem Set #1// (STARTS LINE 11)
-// Manipulating Data Problem Set #2 // (STARTS LINE 110)
+**** // Data Formats and Conversion Problem Set #1// ****
+****// Manipulating Data Problem Set #2 // (STARTS AT 27 - 69 THEN AT 147 - 209) ****
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
@@ -24,9 +26,48 @@ log using log1, replace // Opens log //
 
 *______________________________________________________________________________*
 
-use "https://github.com/RickConnelly/Data-Management/blob/master/ELA%20PERFORMANCE.dta?raw=true", clear // This pulls data on NJ School District Student Performance from the NJ DOE. More specifically this data is about student performance in English Language Arts/Literacy (ELA) and Mathematics as measured by the Partnership for Assessment of Readiness for College and Careers assessment, also known as the PARCC test. The data displays PARCC results overall, by grade or test, and by school year. //
+use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE //
 
-merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using "https://github.com/RickConnelly/Data-Management/blob/master/MATH%20PERFORMANCE.dta?raw=true" // Merges Math Performance with ELA Performance Data //
+drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+
+ren ValidScores MATHValidScores
+ren ParticipationPercent MATHParticipationPercent
+ren DistrictPerformance MATHDistrictPerformance
+ren StatePerformance MATHStatePerformance
+ren AnnualTarget MATHAnnualTarget
+ren MetTarget MATHMetTarget
+// This renames each variable to designate data specific to Math test scores//
+
+drop if CountyName == "CHARTERS"
+drop if CountyName == "State"
+// The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
+
+save NJ_MATH_2017_18, replace //Saves the data be later pulled to merge with English Language Arts Scores //
+
+use "https://github.com/RickConnelly/Data/blob/master/NJ_ELA_2017_18.dta?raw=true", clear //This is the raw data on NJ ELA test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE //
+
+
+drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+
+ren ValidScores ELAValidScores
+ren ParticipationPercent ELAParticipationPercent
+ren DistrictPerformance ELADistrictPerformance
+ren StatePerformance ELAStatePerformance
+ren AnnualTarget ELAAnnualTarget
+ren MetTarget ELAMetTarget
+// This renames each variable to designate data specific to English Language Arts test scores//
+
+drop if CountyName == "CHARTERS"
+drop if CountyName == "State"
+// The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
+
+save NJ_ELA_2017_18, replace // Saves the data be later pulled to merge with Math Scores //
+
+// This pulls data on NJ School District Student Performance from the NJ DOE. More specifically this data is about student performance in English Language Arts/Literacy (ELA) and Mathematics as measured by the Partnership for Assessment of Readiness for College and Careers assessment, also known as the PARCC test. The data displays PARCC results overall, by grade or test, and by school year. //
+
+
+merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_MATH_2017_18 // Merges Math Performance with ELA Performance Data for the 2018-2019 school year //
+
 drop _merge // drops variable created by merge command //
 
 replace ELAValidScores="." if ELAValidScores=="*"
@@ -36,9 +77,7 @@ replace ELAParticipationPercent="." if ELAParticipationPercent=="N"
 replace ELADistrictPerformance="." if ELADistrictPerformance=="*"
 replace ELADistrictPerformance="." if ELADistrictPerformance=="N"  
 replace ELAStatePerformance="." if ELAStatePerformance=="*"
-replace ELAStatePerformance="." if ELAStatePerformance=="N"  
-replace ELAProfRateFederalAccountability="." if ELAProfRateFederalAccountability=="*"
-replace ELAProfRateFederalAccountability="." if ELAProfRateFederalAccountability=="N"  
+replace ELAStatePerformance="." if ELAStatePerformance=="N"   
 replace ELAAnnualTarget="." if ELAAnnualTarget=="**" 
 replace ELAAnnualTarget="." if ELAAnnualTarget=="N" 
 replace ELAMetTarget="." if ELAMetTarget=="**" 
@@ -54,9 +93,7 @@ replace MATHParticipationPercent="." if MATHParticipationPercent=="N"
 replace MATHDistrictPerformance="." if MATHDistrictPerformance=="*" 
 replace MATHDistrictPerformance="." if MATHDistrictPerformance=="N" 
 replace MATHStatePerformance="." if MATHStatePerformance=="*"
-replace MATHStatePerformance="." if MATHStatePerformance=="N"  
-replace MATHProfRateFederalAccountabilit="." if MATHProfRateFederalAccountabilit=="*"
-replace MATHProfRateFederalAccountabilit="." if MATHProfRateFederalAccountabilit=="N"  
+replace MATHStatePerformance="." if MATHStatePerformance=="N"   
 replace MATHAnnualTarget="." if MATHAnnualTarget=="**"
 replace MATHAnnualTarget="." if MATHAnnualTarget=="N"  
 replace MATHMetTarget="." if MATHMetTarget=="**"
@@ -67,7 +104,7 @@ replace MATHMetTarget="1" if MATHMetTarget=="Met Target"
 replace MATHMetTarget="0" if MATHMetTarget=="Not Met" 
 
 
-// ^^^Since I don't know more elegant code to clean the data, I mannually cleaned each varialbe that had missing values in the form of "*" , "**" , and ".999" **ASK HOW TO SIMPLIFY //
+// I mannually cleaned each varialbe that had missing values in the form of "*" , "**" , and ".999" //
 
 // "*" == that data was available for too few students to report the given information, or the data represents a small percentage of students. There may be some additional cases where the data was kept private because the data could be used to potentially identify individual students. //
 
@@ -95,15 +132,17 @@ sum MATHStatePerformance, d // On average 43.9% of students met or exceed expect
 
 *______________________________________________________________________________*
 
-export excel using Education_Data // Exports file into an Excel document //
+export excel using Education_Data,replace // Exports file into an Excel document //
 
-export delimited using Education_Data // Exports file into delimited text //
+export delimited using Education_Data,replace // Exports file into delimited text //
 
-outfile using Education_Data // Exports file into a debased file //
+outfile using Education_Data,replace // Exports file into a debased file //
 
 *______________________________________________________________________________*
 
 log close // Closes Log //
+
+clear //clears Stata //
 
 *______________________________________________________________________________*
 
@@ -111,41 +150,63 @@ log close // Closes Log //
 // **Beginning of PS2** //
 //////////////////////////
 
-******** LOADED DATA SET AND RAN CODE FROM LINE 27 TO LINE 70 ********
-
-set seed 123456789 // Sets randomness to a constant //
-sample 50, count // takes a random sample of 50 observations //
-d // gives a basic description of the sample //
-save Education_Data2, replace // Saves the data under one name //
-
-use Education_Data2, replace
-
-*______________________________________________________________________________*
-
-drop ELAProfRateFederalAccountability // Drops unwanted variables // 
-drop MATHProfRateFederalAccountabilit // Drops unwanted varialbes //
-
-*______________________________________________________________________________*
+use Education_Data, clear // Loads Data //
 
 encode StudentGroup, generate(StudentGroup2) // Generates variable "StudentGroup2" as same variable but with numeric values associated with each category //
-drop StudentGroup // Drops old StudentGroup variable that was stored as a string //
 
+encode DistrictName, generate(DistrictName2) // Generates variable "DistrictName2" as same variable but with numeric values associated with each category //
 
-recode StudentGroup2 (1=1) (2/19=0), gen(Native_American) // Generates new varialbe "Native_American" where 1 = Yes and 0 = No
-recode StudentGroup2 (10=1) (7=0)(1/6=2) (8/9=2) (11/19=2), gen(Gender) // Generates new variable "Gender" 1 = Male, 0 = Female, and 2 = Other Category
+recode DistrictName2 (9=1) (49=1) (55=1) (62=1) (76=1) (115=1) (126=1) (159=1) (166=1) (193=1) (208=1) (219=1) (224=1) (225=1) (261=1) (303=1) (330=1) (333=1) (337=1) (374=1) (378=1) (380=1) (385=1) (386=1) (392=1) (393=1) (436=1) (487=1) (490=1) (501=1) (526=1) (nonm = 0), gen(Abbot_SchoolDist)
+// recodes DistrictName2 to identify Abbot School as 1 and NON-Abbot School as 0 then generates new var "Abbot_SchoolDist" to show this //
 
+save Education_2, replace // Saves manipulated Data //
 
-gen group=_n // Generates blank variable //
+*______________________________________________________________________________*
 
-bys StudentGroup2: egen SortedStudentGroup2=count(group) //Sorts StudentGroup by category //
-drop group // Ask how to make this not have to happen OR why it is happening //
-drop SortedStudentGroup2 // Ask how to make this not have to happen OR why it is happening //
+// The purpose of this code is select a random sample to run descriptive statistics on //
 
-gen group=_n // Generates blank variable //
+use Education_2, clear // Tells Stata to use manipulated Data // 
 
-bys CountyName: egen SortedCountyName=count(group)
-drop group // Ask how to make this not have to happen OR why it is happening //
-drop SortedCountyName // Ask how to make this not have to happen OR why it is happening //
+keep ELADistrictPerformance MATHDistrictPerformance DistrictName2 StudentGroup2 Abbot_SchoolDist //Tells Stata which varibles to keep //
 
+keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
+order DistrictName2 StudentGroup2 ELADistrictPerformance MATHDistrictPerformance Abbot_SchoolDist // Orders Data in an easily digestable manner //
 
-bys StudentGroup2: egen ELA_Score_byGroup=mean(ELAStatePerformance) // This didn't show me anything of importance //
+sort DistrictName2 // Sorts DistrictName2 Alphabetically //
+set seed 123456789 // Sets randomness to a constant //
+sample 50, count // takes a random sample of 50 observations //
+
+collapse ELADistrictPerformance MATHDistrictPerformance Abbot_SchoolD,by(DistrictName2) 
+
+bys DistrictName2: sum *DistrictPerformance // This provides basic statistics on a random sample of school districts in New Jersey //
+
+*______________________________________________________________________________*
+
+// The purpose of this code is compare student achievement between Abbot Schools and Non-Abbot Schools in the 2018-2019 school year. 
+
+use Education_2, clear // Reloads manipulated data //
+
+keep ELADistrictPerformance MATHDistrictPerformance DistrictName2 StudentGroup2 Abbot_SchoolDist // Tells Stata keep these specific variables //
+
+keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
+order DistrictName2 StudentGroup2 ELADistrictPerformance MATHDistrictPerformance Abbot_SchoolDist
+// Orders Data in an easily digestable manner //
+
+collapse  ELADistrictPerformance MATHDistrictPerformance Abbot_SchoolD,by(DistrictName2) // This collpases all demographics in each school district into the average standardized test scores for but ELA and Math with an Abbot school designation associated with each district shown in "Abbot_SchoolD".
+
+bys Abbot_SchoolD: sum *DistrictPerformance // This sorts each school district into an Abbot School or Non-Abbot school, then tabulates the percentage of students who met or exceeded expectations to provide descriptive statistics on student achievement comparing the two types of school districts. // 
+
+ta DistrictName2 if MATHDistrictPerformance<11 // This details an investigation of a possible outlier on the lowest percentile of students who met or exceeded expectations in math testing (only 11% of students met or exceed expectations) from a non-Abbot school district. The school district responsbile for such low scores is the Trenton City School District. It's likely the same factors contributing to poor test results as Abbot schools are contributing to the poor results of the Trenton City School district. More research is required to determine if this is true. //
+
+*______________________________________________________________________________*
+
+use Education_2, clear // Reloads manipulated data //
+
+keep ELADistrictPerformance MATHDistrictPerformance DistrictName2 StudentGroup2 Abbot_SchoolDist // Tells Stata keep these specific variables //
+
+keep if Abbot_SchoolDist == 1 // Drops all Non-Abbot Schools
+order DistrictName2 StudentGroup2 ELADistrictPerformance MATHDistrictPerformance Abbot_SchoolDist // Orders data easily digestable manner //
+drop Abbot_SchoolDist // Drops the numeric repsentation for an Abbot School //
+
+collapse ELADistrictPerformance MATHDistrictPerformance,by(StudentGroup2) // This shows how each demographic scored on standardized tests in Abbot Schools. On average, Black or African American students score lower on both math and reading than White students. Female students score signficantly higher than male students on the ELA portion of the test while male students score higher on the math portion than females. Interestingly, the demographic that scored the lowest are migrant students. Initally I had wondered if the reason behind this was that the tests were only administered in English. However, further research shows PARCC testing is adminstered in 10 languages suggesting the test was adminstered in the migrant student's native language. 
+
