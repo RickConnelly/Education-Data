@@ -8,16 +8,15 @@
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
 
-//looking gfood! one thing could do is to add here as a comment couple pargagraphs
-//about what this research is about
-//research question, hypotheses, model, variables
-//kind of walk us through your logic and thinking here
+// This research aims to examine the reimplementation of additional funding support for school districts after the 2011 decision in the NJ Supreme Court case Abbot v. Burke. These school districts are of extremely low socioeconomic status and thus have failing schools since school funding in New Jersey is tied to property value. Originally decided in 1985 these schools lost their additional funding in the wake of the recession, where the first cut in many state budgets were state aid to school districts. Once the economy began to recover Abbot v. Burke was reintroduced and such the original 31 school districts were regranted additional funding as a means to ensure the NJ consitutional right to a rigorous and thorough education.  
+
+// My attmempt with this code is examine whether or not this extra funding since 2011 has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, graduation rates, and possibly student attendence I will attempt to find any relationship between student achievement in Abbot School Districts compared to non-Abott School Districts.
 
 *______________________________________________________________________________*
 
 clear // clears any prior data that could have already been loaded into Stata //
 set matsize 800 // Sets maximum number of variables in model to 800 //   
-vers 15 //Sets the software version to Stata 14 //
+vers 15 //Sets the software version to Stata 15 //
 set more off // tells Stata to not pause and show -more message- // 
 cap log close // Allows the .dofile to continue despite possible error messages //
 
