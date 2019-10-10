@@ -8,6 +8,11 @@
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
 
+//looking gfood! one thing could do is to add here as a comment couple pargagraphs
+//about what this research is about
+//research question, hypotheses, model, variables
+//kind of walk us through your logic and thinking here
+
 *______________________________________________________________________________*
 
 clear // clears any prior data that could have already been loaded into Stata //
