@@ -1,6 +1,7 @@
 ******************************************************************
 *Please refer to heading to find specific problem sets, thank you*
 ******************************************************************
+//destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") replace 
 
 ****// Data Formats and Conversion Problem Set #1 (STARTS LINE 20 - 79 THEN 197 - 278)//****
 ****// Manipulating Data Problem Set #2 (STARTS LINE 309 - 375 ORIGINAL MERGE FOR PS2 STARTS LINE 81)//**** 
