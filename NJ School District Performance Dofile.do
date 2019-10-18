@@ -3,6 +3,9 @@
 ******************************************************************
 //destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") replace 
 
+//overall almost there, just pls add like 2 datasets from elsewhere, eg census has district level data; and can get more educ data
+//from some other agency, say federal dept of educ or county level dept of educ etc
+
 ****// Data Formats and Conversion Problem Set #1 (STARTS LINE 20 - 79 THEN 197 - 278)//****
 ****// Manipulating Data Problem Set #2 (STARTS LINE 309 - 375 ORIGINAL MERGE FOR PS2 STARTS LINE 81)//**** 
 ****// Merging Problem Set #3 (STARTS LINE 90 - 193 THEN 379 - 394)//**** 
@@ -44,6 +47,7 @@ log using log1, replace // Opens log //
 
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE //
+//if possible pls give exact url for these data or at least full detailed description so i can find it online myself;same for others
 
 drop Subject ProfRateFederalAccountability //Drops unneeded variables //
 
