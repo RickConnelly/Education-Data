@@ -1,3 +1,7 @@
+//better, one or two quick comments later; still could have gotten more data from elsewhere; 
+//persistent limitation here is that though you have like 6 physical datasets, its just 2 from sources
+//the idea for ps3 was to pull from as diverse sources as possible, ideally 6 totally different sources
+
 ******************************************************************
 *Please refer to heading to find specific problem sets, thank you*
 ******************************************************************
@@ -43,6 +47,8 @@ log using log1, replace // Opens log //
 
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under MathParticpationPerform//
+//no need to repeat all the time 'the direct link to..." its obvious what it is, be more lazy
+//and on that note, why not load excel file straight from that website?
 
 drop Subject ProfRateFederalAccountability //Drops unneeded variables //
 
