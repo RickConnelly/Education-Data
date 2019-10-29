@@ -1,15 +1,3 @@
-//better, one or two quick comments later; still could have gotten more data from elsewhere; 
-//persistent limitation here is that though you have like 6 physical datasets, its just 2 from sources
-//the idea for ps3 was to pull from as diverse sources as possible, ideally 6 totally different sources
-
-******************************************************************
-*Please refer to heading to find specific problem sets, thank you*
-******************************************************************
-
-****// Data Formats and Conversion Problem Set #1 (STARTS LINE 20 - 79 THEN 197 - 278)//****
-****// Manipulating Data Problem Set #2 (STARTS LINE 309 - 375 ORIGINAL MERGE FOR PS2 STARTS LINE 81)//**** 
-****// Merging Problem Set #3 (STARTS LINE 90 - 193 THEN 379 - 394)//**** 
-
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
@@ -47,8 +35,6 @@ log using log1, replace // Opens log //
 
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under MathParticpationPerform//
-//no need to repeat all the time 'the direct link to..." its obvious what it is, be more lazy
-//and on that note, why not load excel file straight from that website?
 
 drop Subject ProfRateFederalAccountability //Drops unneeded variables //
 
@@ -275,6 +261,70 @@ merge m:1 DistrictName using NJ_Poverty_Two_Years // This merges the poverty dat
 // From this merge there are *MANY* non-mergers. Since we want to specifically study abbot school districts we made sure earlier to mannually rename them to ensure a proper merge. All other school districts that did not merge can be dropped because of this. While this deletes many observations we will still have all abbot school districts and a large number of non-Abott schools we can use for comparision later on should we so choose.
 drop if _merge==1 // Drops non-mergers mentioned above //
 drop if _merge==2 // Drops non-mergers mentioned above //
+drop _merge 
+
+save Education_Data_Scores_Expenditures_Poverty, replace
+
+
+*_____________________________________________________________________________________________*
+// This data was imported from County Health Rankings & Roadmaps. Link to the data can be found here: https://www.countyhealthrankings.org/app/new-jersey/2016/downloads //
+
+
+import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2017%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v2.xls", sheet("Ranked Measure Data") clear // Imports the excel directly from the County Health Rankings & Roadmaps, and pulls directly from the sheet titled Ranked Measure Data. //
+
+ren C CountyName
+ren AB AdultSmoking2016_17 // Percent of population (audlts) who smoke per county //
+ren AF AdultObseity2016_17 //Percent of population (adults) who are obsese per county //
+ren AL PhysicalInactivity2016_17 // Percent of population who are physically inactive per county //
+ren AR ExcessiveDrinking2016_17 // Percent of population who are excessive drinkers per county //
+ren BE TeenBirths2016_17 // Number of Teen Births per county //
+ren DU SingleParentHouse2016_17 // Number of Single-Parent Households per county //
+ren ED ViolentCrime2016_17 // Number of Violent Crimes per county //
+
+keep CountyName AdultSmoking2016_17 AdultObseity2016_17 PhysicalInactivity2016_17 ExcessiveDrinking2016_17 TeenBirths2016_17 SingleParentHouse2016_17 ViolentCrime2016_17 // This keeps the variables we wish to merge into master dataset //
+
+drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above //
+
+save Public_health_2016_17, replace
+
+
+*_____________________________________________________________________________________________*
+
+
+import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2018%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v3.xls", sheet ("Ranked Measure Data") clear
+
+ren C CountyName
+ren AE AdultSmoking2017_18 // Percent of population (audlts) who smoke per county //
+ren AI AdultObseity2017_18 //Percent of population (adults) who are obsese per county //
+ren AO PhysicalInactivity2017_18 // Percent of population who are physically inactive per county //
+ren AU ExcessiveDrinking2017_18 // Percent of population who are excessive drinkers per county //
+ren BH TeenBirths2017_18 // Number of Teen Births per county //
+ren DW SingleParentHouse2017_18 // Number of Single-Parent Households per county //
+ren EF ViolentCrime2017_18 // Number of Violent Crimes per county //
+
+keep CountyName AdultSmoking2017_18 AdultObseity2017_18 PhysicalInactivity2017_18 ExcessiveDrinking2017_18 TeenBirths2017_18 SingleParentHouse2017_18 ViolentCrime2017_18 // This keeps the variables we wish to merge into master dataset
+
+drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above.
+
+save Public_health_2017_18, replace
+
+
+*_____________________________________________________________________________________________*
+
+
+use Public_health_2016_17, clear // Loads the previously manipulated dataset //
+merge 1:1 CountyName using Public_health_2017_18 // Easy merge, simple 1 to 1 with no non-mergers. // 
+replace CountyName =upper(CountyName) // Makes all strings in County upper case to help with merge to master //
+drop _merge
+
+save Public_health_2_years, replace
+
+
+*______________________________________________________________________________*
+
+
+use Education_Data_Scores_Expenditures_Poverty, clear
+merge m:1 CountyName using Public_health_2_years // Awesome! No non-mergers. Looking over the data all varialbes mergered properly. 
 drop _merge
 
 
