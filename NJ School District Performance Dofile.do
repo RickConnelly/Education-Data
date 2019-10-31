@@ -473,8 +473,9 @@ gr hbar (mean) MATHDisPerf2016_17, over(Abbot_SchoolDist, sort(MATHDisPerf2016_1
 gr hbar (mean) ELADisPerf2016_17, over(Abbot_SchoolDist, sort(ELADisPerf2016_17) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(ELAPerformance2016_17)
 gr hbar (mean) ELADisPerf2017_18, over(Abbot_SchoolDist, sort(ELADisPerf2017_18) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(ELAPerformance2017_18)
 
-gr combine MathPerformance2017_18 ELAPerformance2017_18
-gr combine MathPerformance2016_17 ELAPerformance2016_17
+//This shows each school years Math and ELA test scores (% met or exceeded expectations) side by side sorting on whether the school district is an Abbot Shool or not. 0 = Non-Abbot 1 = Abbot. The spread here is generally what we would expect. Abbot school are performing by and large lower than non-Abbot schools. There are some interesting caveats however. //
+gr combine MathPerformance2017_18 ELAPerformance2017_18 // In the 2017-2018 school year American Indidan and Alaskan Native students tested better in both math and english language arts in Abbot schools than in non-Abbot schools. Students with disabilties tested better in ELA than their counterparts.
+gr combine MathPerformance2016_17 ELAPerformance2016_17 // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
 
@@ -484,11 +485,24 @@ tw (scatter MATHDisPerf2016_17 PovertyStudentPop2016_17, msize(vsmall))(lfit MAT
 
 gr combine Poverty_Math_2017_2018 Poverty_Math_2016_2017,col(1) title(Math Test Scores and Poverty) // Interestingly, we see more of a drop in math test scores with less student populations in poverty for the 2017-2018 school year whereas in the 2016-2017 school year we have higher populations per school district in poverty yet math test scores overall dropped less. 
 
+*______________________________________________________________________________*
 
+tw (scatter ELADisPerf2017_18 PovertyStudentPop2017_18, msize(vsmall))(lfit ELADisPerf2017_18 PovertyStudentPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2017-2018 School Year) name(Poverty_ELA_2017_2018)
 
+tw (scatter ELADisPerf2016_17 PovertyStudentPop2016_17, msize(vsmall))(lfit ELADisPerf2016_17 PovertyStudentPop2016_17), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2016-2017 School Year) name(Poverty_ELA_2016_2017)
 
+gr combine Poverty_ELA_2017_2018 Poverty_ELA_2016_2017,col(1) title(ELA Test Scores and Poverty) // Similar trends here, as poverty increases english test scores increase.
 
+*______________________________________________________________________________*
+// Have to come back and explain in more detail here
+use Education_Data_TOTAL_2, clear
+keep if Abbot_SchoolDist==1
 
+tw (scatter ELADisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_ELA_2016_2017)
 
+tw (scatter ELADisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit ELADisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_ELA_2017_2018)
 
+tw (scatter MATHDisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_MATH_2017_2018)
 
