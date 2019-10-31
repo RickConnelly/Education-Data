@@ -384,8 +384,8 @@ encode CountyName, gen(CountyName2) // Generates variable "CountyName2" as same 
 recode DistrictName2 (2=1) (11=1) (14=1) (16=1) (20=1) (26=1) (29=1) (33=1) (35=1) (42=1) (45=1) (47=1) (48=1) (49=1) (60=1) (65=1) (69=1) (71=1) (72=1) (81=1) (83=1) (84=1) (85=1) (86=1) (88=1) (89=1) (96=1) (108=1) (109=1) (111=1) (117=1) (nonm = 0), gen(Abbot_SchoolDist)
 // recodes DistrictName2 to identify Abbot School as 1 and NON-Abbot School as 0 then generates new var "Abbot_SchoolDist" to show this (with new data mergers this had to be redone) //
 
-drop CountyName DistrictCode DistrictName StudentGroup
-order CountyCode CountyName2 DistrictName2 Abbot_SchoolDist StudentGroup2 ELAValidScores2017_18 ELAParticPerc2017_18 ELADisPerf2017_18 ELAStatePerf2017_18 ELAAnnTar2017_18 ELAMetTar2017_18 MATHValidScores2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 MATHStatePerf2017_18 MATHAnnTar2017_18 MATHMetTar2017_18 ExpPerPupil2017_18 MATHValidScores2016_17 MATHParticPerc2016_17 MATHDisPerf2016_17 MATHStatePerf2016_17 MATHAnnTar2016_17 MATHMetTar2016_17 ELAValidScores2016_17 ELAParticPerc2016_17 ELADisPerf2016_17 ELAStatePerf2016_17 ELAAnnTar2016_17 ELAMetTar2016_17 //orders data for easier visualization
+drop CountyName DistrictCode DistrictName StudentGroup ELAMetTar2016_17 ELAAnnTar2016_17 ELAStatePerf2016_17 ELAValidScores2016_17 MATHMetTar2016_17 MATHAnnTar2016_17 MATHStatePerf2016_17 MATHValidScores2016_17 MATHMetTar2017_18 MATHAnnTar2017_18 MATHStatePerf2017_18 MATHValidScores2017_18 ELAMetTar2017_18 ELAAnnTar2017_18 ELAStatePerf2017_18 ELAValidScores2017_18 CountyCode
+order CountyName2 DistrictName2 Abbot_SchoolDist StudentGroup2 ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
 
 save Education_Data_TOTAL_2, replace // Saves manipulated Data //
 
@@ -458,3 +458,37 @@ keep if Abbot_SchoolDist == 1 // This tells Stata to keep only Abbot Schools
 drop Abbot_SchoolDist // Drops unnecessary variable //
 reshape long ExpPerPupil, i(DistrictName2) j(Year) string //Reshapes data to long format //
 order DistrictName2 StudentGroup2 Year ExpPerPupil // Orders the data //
+
+
+*______________________________________________________________________________*
+
+////////////////////////////////////////////////////////////////////////////////
+// **Beginning of PS4** ////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+use Education_Data_TOTAL_2, clear
+
+gr hbar (mean) MATHDisPerf2017_18, over(Abbot_SchoolDist, sort(MATHDisPerf2017_18) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(MathPerformance2017_18)
+gr hbar (mean) MATHDisPerf2016_17, over(Abbot_SchoolDist, sort(MATHDisPerf2016_17) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(MathPerformance2016_17)
+gr hbar (mean) ELADisPerf2016_17, over(Abbot_SchoolDist, sort(ELADisPerf2016_17) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(ELAPerformance2016_17)
+gr hbar (mean) ELADisPerf2017_18, over(Abbot_SchoolDist, sort(ELADisPerf2017_18) label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(ELAPerformance2017_18)
+
+gr combine MathPerformance2017_18 ELAPerformance2017_18
+gr combine MathPerformance2016_17 ELAPerformance2016_17
+
+*______________________________________________________________________________*
+
+tw (scatter MATHDisPerf2017_18 PovertyStudentPop2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 PovertyStudentPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2017-2018 School Year) name(Poverty_Math_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 PovertyStudentPop2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 PovertyStudentPop2016_17), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2016-2017 School Year) name(Poverty_Math_2016_2017)
+
+gr combine Poverty_Math_2017_2018 Poverty_Math_2016_2017,col(1) title(Math Test Scores and Poverty) // Interestingly, we see more of a drop in math test scores with less student populations in poverty for the 2017-2018 school year whereas in the 2016-2017 school year we have higher populations per school district in poverty yet math test scores overall dropped less. 
+
+
+
+
+
+
+
+
+
