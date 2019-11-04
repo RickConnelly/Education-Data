@@ -6,7 +6,6 @@
 
 // My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbot School Districts compared to non-Abott School Districts.
 
-
 *______________________________________________________________________________*
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +18,6 @@ vers 15 //Sets the software version to Stata 15 //
 set more off // tells Stata to not pause and show -more message- // 
 cap log close // Allows the .dofile to continue despite possible error messages //
 
-
 *______________________________________________________________________________*
 
 
@@ -29,10 +27,8 @@ cd "C:\Users\rjc361\Desktop/Stata_data/" // Sets the working directory to aforem
 
 log using log1, replace // Opens log //
 
-
 *______________________________________________________________________________*
 * In this section we're going to pull Math and English Language Arts Test scores from the 2017-2018 school year and merge them *
-
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under MathParticpationPerform//
 
@@ -74,7 +70,6 @@ merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_
 drop _merge // drops variable created by merge command //
 
 save Education_Data_2017_2018, replace // This saves the merged ELA and MATH test scores for the school year 2017-2018 to be pulled later to merge with other data sets //
-
 
 *______________________________________________________________________________*
 * Similarly, in this section we're going to pull Math and English Language Arts Test scores from the 2016-2017 school year and merge them *
@@ -124,10 +119,8 @@ drop _merge // drops variable created by merge command //
 
 save Education_Data_2016_2017, replace // This saves the merged ELA and MATH test scores for the school year 2017-2018 to be pulled later to merge with other data sets //
 
-
 *______________________________________________________________________________*
 * In this section we are going to merge both school years worth of test scores into one dataset * 
-
 
 use Education_Data_2017_2018, clear
 
@@ -137,10 +130,8 @@ drop _merge // drops variable created by merge command //
 save Education_Data_2_Years,replace
 // Here we have the merged data set for both school years on standardized test scores in both math and english language arts // 
 
-
 *______________________________________________________________________________*
 * This section is where we are pulling data on Per Pupil Expenditures from the New Jersey Department of Education in the 2017-2018 and 2016-2017 school years, once we clean it we each of them we will save it to be merged with the rest of the data *
-
 
 use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2017_18.dta?raw=true", clear // Now we're going to pull the data for per pupil expenditures for each school district in New Jersey. We are only interested in State and Local aid, since Abbot v. Burke only impacts state aid funding. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under Per Pupil Expenditures. //
 
@@ -165,10 +156,8 @@ drop if CountyName == "CHARTERS"
 
 save Per_Pupil_Expenditures_2016_17, replace
 
-
 *______________________________________________________________________________*
 *This section merges in each school year's state aid per pupil in New Jersey. *
-
 
 use Education_Data_2_Years, clear
 
@@ -188,9 +177,7 @@ drop _merge
 
 save Education_Data_2_Years_Cleaned, replace
 
-
 *______________________________________________________________________________*
-
 
 // I pulled school district poverty data from the U.S. Census for both school years (2016-2017 2017-2018) Direct link to page where data was used can be found here:
 // https://www.census.gov/data/datasets/2016/demo/saipe/2016-school-districts.html //
@@ -253,7 +240,6 @@ replace DistrictName = "PEMBERTON TWP" in 371
 
 save NJ_Poverty_Two_Years, replace // Saves the merged poverty data //
 
-
 *_____________________________________________________________________________________________*
 
 use Education_Data_2_Years_Cleaned, replace // Here we load the previously merged data sets **THIS CAN BE USEFUL FOR OTHER RESEARCH QUESTIONS LATER ON, HOWEVER TO MERGE POVERTY DATA WE MUST HEAVILY MANIPUALTE DATASET ** //
@@ -265,52 +251,46 @@ drop _merge
 
 save Education_Data_Scores_Expenditures_Poverty, replace
 
-
 *_____________________________________________________________________________________________*
 // This data was imported from County Health Rankings & Roadmaps. Link to the data can be found here: https://www.countyhealthrankings.org/app/new-jersey/2016/downloads //
-
 
 import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2017%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v2.xls", sheet("Ranked Measure Data") clear // Imports the excel directly from the County Health Rankings & Roadmaps, and pulls directly from the sheet titled Ranked Measure Data. //
 
 ren C CountyName
 ren AB AdultSmoking2016_17 // Percent of population (audlts) who smoke per county //
-ren AF AdultObseity2016_17 //Percent of population (adults) who are obsese per county //
+ren AF AdultObesity2016_17 //Percent of population (adults) who are obsese per county //
 ren AL PhysicalInactivity2016_17 // Percent of population who are physically inactive per county //
 ren AR ExcessiveDrinking2016_17 // Percent of population who are excessive drinkers per county //
-ren BE TeenBirths2016_17 // Number of Teen Births per county //
-ren DU SingleParentHouse2016_17 // Number of Single-Parent Households per county //
-ren ED ViolentCrime2016_17 // Number of Violent Crimes per county //
+ren BG TeenBirths2016_17 // Teen birth rate per county //
+ren DW SingleParentHouse2016_17 // Percentage of Single-Parent Households //
+ren EE ViolentCrime2016_17 // Violent Crime rate per county //
 
-keep CountyName AdultSmoking2016_17 AdultObseity2016_17 PhysicalInactivity2016_17 ExcessiveDrinking2016_17 TeenBirths2016_17 SingleParentHouse2016_17 ViolentCrime2016_17 // This keeps the variables we wish to merge into master dataset //
+keep CountyName AdultSmoking2016_17 AdultObesity2016_17 PhysicalInactivity2016_17 ExcessiveDrinking2016_17 TeenBirths2016_17 SingleParentHouse2016_17 ViolentCrime2016_17 // This keeps the variables we wish to merge into master dataset //
 
 drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above //
 
 save Public_health_2016_17, replace
 
-
 *_____________________________________________________________________________________________*
-
 
 import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2018%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v3.xls", sheet ("Ranked Measure Data") clear
 
 ren C CountyName
 ren AE AdultSmoking2017_18 // Percent of population (audlts) who smoke per county //
-ren AI AdultObseity2017_18 //Percent of population (adults) who are obsese per county //
+ren AI AdultObesity2017_18 //Percent of population (adults) who are obsese per county //
 ren AO PhysicalInactivity2017_18 // Percent of population who are physically inactive per county //
 ren AU ExcessiveDrinking2017_18 // Percent of population who are excessive drinkers per county //
 ren BH TeenBirths2017_18 // Number of Teen Births per county //
-ren DW SingleParentHouse2017_18 // Number of Single-Parent Households per county //
-ren EF ViolentCrime2017_18 // Number of Violent Crimes per county //
+ren DY SingleParentHouse2017_18 // Number of Single-Parent Households per county //
+ren EG ViolentCrime2017_18 // Number of Violent Crimes per county //
 
-keep CountyName AdultSmoking2017_18 AdultObseity2017_18 PhysicalInactivity2017_18 ExcessiveDrinking2017_18 TeenBirths2017_18 SingleParentHouse2017_18 ViolentCrime2017_18 // This keeps the variables we wish to merge into master dataset
+keep CountyName AdultSmoking2017_18 AdultObesity2017_18 PhysicalInactivity2017_18 ExcessiveDrinking2017_18 TeenBirths2017_18 SingleParentHouse2017_18 ViolentCrime2017_18 // This keeps the variables we wish to merge into master dataset
 
 drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above.
 
 save Public_health_2017_18, replace
 
-
 *_____________________________________________________________________________________________*
-
 
 use Public_health_2016_17, clear // Loads the previously manipulated dataset //
 merge 1:1 CountyName using Public_health_2017_18 // Easy merge, simple 1 to 1 with no non-mergers. // 
@@ -319,18 +299,14 @@ drop _merge
 
 save Public_health_2_years, replace
 
-
 *______________________________________________________________________________*
-
 
 use Education_Data_Scores_Expenditures_Poverty, clear
 merge m:1 CountyName using Public_health_2_years // Awesome! No non-mergers. Looking over the data all varialbes mergered properly. 
 drop _merge
 
-
 *______________________________________________________________________________*
 * This section's code cleans the data in order for it to destring properly, and then save it. *
-
 
 destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") replace 
 
@@ -344,10 +320,8 @@ destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") rep
 
 save Education_Data_TOTAL, replace // Saves the data under one name //
 
-
 *______________________________________________________________________________*
 * This section shows some descriptive statistics to better familiarize ourselves with the data. *
-
 
 sum ELADisPerf2017_18,d // This statstic shows that on average at the **District Level** 56.9% of students met or exceeded expectations in their performance on ELA assessments. Students in the upper quartile met or exceeded expectations at 71.9% while the lower quartile shows that 41.2% met or exceeded expectations with a SD of about 20.5%. The data is very slightly skewed to the left. // 
 
@@ -357,17 +331,14 @@ sum MATHDisPerf2017_18,d // On average at the district level 44.8% of students m
 
 sum MATHStatePerf2017_18, d // On average 43.9% of students met or exceed expectations on their performance on math assessments at the state level. This is only slightly less than the average at the district level. Overall, at the upper quartile 50.5% of students met or exceeded expectations and in the lower quartile only 23.7% met or exceeded expectations. //
 
-
 *______________________________________________________________________________*
 * This section exports the data in several different formats, and closes the log then clears the data. *
-
 
 export excel using Education_Data_TOTAL,replace // Exports file into an Excel document //
 export delimited using Education_Data_TOTAL,replace // Exports file into delimited text //
 outfile using Education_Data_TOTAL,replace // Exports file into a debased file //
 // log close // Closes Log //
 clear //clears Stata //
-
 
 *______________________________________________________________________________*
 
@@ -389,10 +360,8 @@ order CountyName2 DistrictName2 Abbot_SchoolDist StudentGroup2 ELAParticPerc2017
 
 save Education_Data_TOTAL_2, replace // Saves manipulated Data //
 
-
 *______________________________________________________________________________*
 * The purpose of this code is select a random sample to run descriptive statistics on. *
-
 
 use Education_Data_TOTAL_2, clear // Tells Stata to use manipulated Data // 
 
@@ -408,10 +377,8 @@ collapse ELADisPerf2017_18 MATHDisPerf2017_18 Abbot_SchoolD,by(DistrictName2)
 
 bys DistrictName2: sum *DisPerf2017_18 // This provides basic statistics on a random sample of school districts in New Jersey //
 
-
 *______________________________________________________________________________*
 *The purpose of this code is compare student achievement between Abbot Schools and Non-Abbot Schools in the 2017-2018 school year.*
-
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
@@ -426,10 +393,8 @@ bys Abbot_SchoolD: sum *DisPerf2017_18 // This sorts each school district into a
 
 ta DistrictName2 if MATHDisPerf2017_18<11 // This details an investigation of a possible outlier on the lowest percentile of students who met or exceeded expectations in math testing (only 11% of students met or exceed expectations) from a non-Abbot school district. The school district responsbile for such low scores is the Trenton City School District. It's likely the same factors contributing to poor test results as Abbot schools are contributing to the poor results of the Trenton City School district. More research is required to determine if this is true. //
 
-
 *______________________________________________________________________________*
 *This sections shows the district wide test scores for each demographic throughout each Abbot School. *
-
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
@@ -444,10 +409,8 @@ collapse ELADisPerf2017_18 MATHDisPerf2017_18 ELADisPerf2016_17 MATHDisPerf2016_
 
 reshape long ELADisPerf MATHDisPerf, i(StudentGroup2) j(Year) string // Reshapes data to long format  //
 
-
 *______________________________________________________________________________*
 *This section shows the changes in aid over the two year period and reshapes the data. *
-
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
@@ -459,12 +422,13 @@ drop Abbot_SchoolDist // Drops unnecessary variable //
 reshape long ExpPerPupil, i(DistrictName2) j(Year) string //Reshapes data to long format //
 order DistrictName2 StudentGroup2 Year ExpPerPupil // Orders the data //
 
-
 *______________________________________________________________________________*
 
 ////////////////////////////////////////////////////////////////////////////////
 // **Beginning of PS4** ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+// This will all soon be streamlined greatly through macros and loops by the time PS5 is due.
 
 use Education_Data_TOTAL_2, clear
 
@@ -478,7 +442,7 @@ gr combine MathPerformance2017_18 ELAPerformance2017_18 // In the 2017-2018 scho
 gr combine MathPerformance2016_17 ELAPerformance2016_17 // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
-
+*** Have to control for population here in revision
 tw (scatter MATHDisPerf2017_18 PovertyStudentPop2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 PovertyStudentPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2017-2018 School Year) name(Poverty_Math_2017_2018)
 
 tw (scatter MATHDisPerf2016_17 PovertyStudentPop2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 PovertyStudentPop2016_17), ytitle(% Met or Exceed Expectations) xtitle(Population in Poverty per School District) title(2016-2017 School Year) name(Poverty_Math_2016_2017)
@@ -494,9 +458,10 @@ tw (scatter ELADisPerf2016_17 PovertyStudentPop2016_17, msize(vsmall))(lfit ELAD
 gr combine Poverty_ELA_2017_2018 Poverty_ELA_2016_2017,col(1) title(ELA Test Scores and Poverty) // Similar trends here, as poverty increases english test scores increase.
 
 *______________________________________________________________________________*
-// Have to come back and explain in more detail here
+***Expenditures per Pupil Relationship w/ Grades***
 use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
+keep if StudentGroup2==4
 
 tw (scatter ELADisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_ELA_2016_2017)
 
@@ -505,4 +470,74 @@ tw (scatter ELADisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit ELADisPerf
 tw (scatter MATHDisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_MATH_2016_2017)
 
 tw (scatter MATHDisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_MATH_2017_2018)
+
+*______________________________________________________________________________*
+***Smoking Relationship w/ Grades***
+tw (scatter ELADisPerf2016_17 AdultSmoking2016_17, msize(vsmall))(lfit ELADisPerf2016_17 AdultSmoking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2016-2017 School Year) name(Smoking_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 AdultSmoking2017_18, msize(vsmall))(lfit ELADisPerf2017_18 AdultSmoking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 AdultSmoking2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 AdultSmoking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2016-2017 School Year) name(Smoking_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 AdultSmoking2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 AdultSmoking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Obesity Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 AdultObesity2016_17, msize(vsmall))(lfit ELADisPerf2016_17 AdultObesity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 AdultObesity2017_18, msize(vsmall))(lfit ELADisPerf2017_18 AdultObesity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 AdultObesity2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 AdultObesity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 AdultObesity2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 AdultObesity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Physical Inactivity Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 PhysicalInactivity2016_17, msize(vsmall))(lfit ELADisPerf2016_17 PhysicalInactivity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2016-2017 School Year) name(Inactivity_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 PhysicalInactivity2017_18, msize(vsmall))(lfit ELADisPerf2017_18 PhysicalInactivity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactivity_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 PhysicalInactivity2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 PhysicalInactivity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2016-2017 School Year) name(Inactivity_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 PhysicalInactivity2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 PhysicalInactivity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactivity_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Excessive Drinking Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 ExcessiveDrinking2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExcessiveDrinking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 ExcessiveDrinking2017_18, msize(vsmall))(lfit ELADisPerf2017_18 ExcessiveDrinking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 ExcessiveDrinking2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExcessiveDrinking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 ExcessiveDrinking2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExcessiveDrinking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Teen Birth Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 TeenBirths2016_17, msize(vsmall))(lfit ELADisPerf2016_17 TeenBirths2016_17), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2016-2017 School Year) name(TeenBirths_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 TeenBirths2017_18, msize(vsmall))(lfit ELADisPerf2017_18 TeenBirths2017_18), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirths_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 TeenBirths2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 TeenBirths2016_17), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2016-2017 School Year) name(TeenBirths_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 TeenBirths2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 TeenBirths2017_18), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirths_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Single Parent Household Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 SingleParentHouse2016_17, msize(vsmall))(lfit ELADisPerf2016_17 SingleParentHouse2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 SingleParentHouse2017_18, msize(vsmall))(lfit ELADisPerf2017_18 SingleParentHouse2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 SingleParentHouse2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 SingleParentHouse2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 SingleParentHouse2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 SingleParentHouse2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent_MATH_2017_2018)
+
+*______________________________________________________________________________*
+**Violent Crime Rate Relationship w/ Grades
+tw (scatter ELADisPerf2016_17 ViolentCrime2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ViolentCrime2016_17), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2016-2017 School Year) name(Crime_ELA_2016_2017)
+
+tw (scatter ELADisPerf2017_18 ViolentCrime2017_18, msize(vsmall))(lfit ELADisPerf2017_18 ViolentCrime2017_18), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime_ELA_2017_2018)
+
+tw (scatter MATHDisPerf2016_17 ViolentCrime2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ViolentCrime2016_17), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2016-2017 School Year) name(Crime_MATH_2016_2017)
+
+tw (scatter MATHDisPerf2017_18 ViolentCrime2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ViolentCrime2017_18), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime_MATH_2017_2018)
 
