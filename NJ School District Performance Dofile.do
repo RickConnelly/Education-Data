@@ -131,9 +131,12 @@ save Education_Data_2_Years,replace
 // Here we have the merged data set for both school years on standardized test scores in both math and english language arts // 
 
 *______________________________________________________________________________*
-* This section is where we are pulling data on Per Pupil Expenditures from the New Jersey Department of Education in the 2017-2018 and 2016-2017 school years, once we clean it we each of them we will save it to be merged with the rest of the data *
+* This section is where we are pulling data on Per Pupil Expenditures from the New Jersey Department of Education in the 2017-2018 and 2016-2017 school years, once we clean it we each of them we will save it to be merged with the rest of the data. We are only interested in State and Local aid, since Abbot v. Burke only impacts state aid funding. The direct link to the data can be found here: 
+// 2017-2018 Expenditure data: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under Per Pupil Expenditures.
+// 2016-2017 Expenditure data: https://rc.doe.state.nj.us/ReportsDatabase/16-17/DistrictPerformanceReports.xlsx under Per Pupil Expenditures. //
 
-use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2017_18.dta?raw=true", clear // Now we're going to pull the data for per pupil expenditures for each school district in New Jersey. We are only interested in State and Local aid, since Abbot v. Burke only impacts state aid funding. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under Per Pupil Expenditures. //
+
+use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2017_18.dta?raw=true", clear 
 
 ren StateLocal ExpPerPupil2017_18 // Renames the variable for proper identification //
 
@@ -143,7 +146,7 @@ drop if CountyName == "State"
 
 save Per_Pupil_Expenditures_2017_18, replace // saves the data to be merged later //
 
-use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2016_17.dta?raw=true", clear // Now we're going to pull the data for per pupil expenditures for each school district in New Jersey. We are only interested in State and Local aid, since Abbot v. Burke only impacts state aid funding. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/16-17/DistrictPerformanceReports.xlsx under Per Pupil Expenditures. //
+use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2016_17.dta?raw=true", clear
 
 ren StateLocal ExpPerPupil2016_17
 ren COUNTY_NAME CountyName
@@ -310,26 +313,12 @@ drop _merge
 
 destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") replace 
 
-// I mannually cleaned each varialbe that had missing values in the form of "*" , "**" , and ".999" //
-
-// "*" == that data was available for too few students to report the given information, or the data represents a small percentage of students. There may be some additional cases where the data was kept private because the data could be used to potentially identify individual students. //
-
+// I mannually cleaned each varialbe that had missing values in the form of "*" , "**" , and ".999" 
+//"*" == that data was available for too few students to report the given information, or the data represents a small percentage of students. There may be some additional cases where the data was kept private because the data could be used to potentially identify individual students. //
 // "**" ==  data was not available for the minimum 20 students, the required number for a student group to be included in New Jersey’s Every Student Succeeds Act ESS accountability system. //
-
 // ".999" == indicates that no data was available to report. This happens when there are no students enrolled in a particular student group or if no data was submitted by the district. //
 
 save Education_Data_TOTAL, replace // Saves the data under one name //
-
-*______________________________________________________________________________*
-* This section shows some descriptive statistics to better familiarize ourselves with the data. *
-
-sum ELADisPerf2017_18,d // This statstic shows that on average at the **District Level** 56.9% of students met or exceeded expectations in their performance on ELA assessments. Students in the upper quartile met or exceeded expectations at 71.9% while the lower quartile shows that 41.2% met or exceeded expectations with a SD of about 20.5%. The data is very slightly skewed to the left. // 
-
-sum ELAStatePerf2017_18,d // This statistic shows that on average at the **State Level** 52.7% of students met or exceeded expectations in their performance on ELA assessments. This is a lower average of assessment expectations met or exceeded than when measuring at the district level by 4.2%. This trend continues in the upper quartile however at the state level a higer proportion of student met or exceeded assessment expectations at the lower quartile. //
-
-sum MATHDisPerf2017_18,d // On average at the district level 44.8% of students met or exceeded expectations on their performance on math assessments. At the upper and lower quartile students met or exceeded expectations at 30.7% and 61.1% respectively. The data is slightly skewed to the right. //
-
-sum MATHStatePerf2017_18, d // On average 43.9% of students met or exceed expectations on their performance on math assessments at the state level. This is only slightly less than the average at the district level. Overall, at the upper quartile 50.5% of students met or exceeded expectations and in the lower quartile only 23.7% met or exceeded expectations. //
 
 *______________________________________________________________________________*
 * This section exports the data in several different formats, and closes the log then clears the data. *
@@ -348,34 +337,43 @@ clear //clears Stata //
 
 use Education_Data_TOTAL, clear // Loads Data //
 
-encode StudentGroup, gen(StudentGroup2) // Generates variable "StudentGroup2" as same variable but with numeric values associated with each category //
-encode DistrictName, gen(DistrictName2) // Generates variable "DistrictName2" as same variable but with numeric values associated with each category //
-encode CountyName, gen(CountyName2) // Generates variable "CountyName2" as same variable but with numeric values associated with each category //
+foreach v in StudentGroup DistrictName CountyName{
+encode `v', gen(`v'2)
+} // Generates variable "StudentGroup2" "DistrictName2" "CountyName2" as same variable but with numeric values associated with each category //
 
 recode DistrictName2 (2=1) (11=1) (14=1) (16=1) (20=1) (26=1) (29=1) (33=1) (35=1) (42=1) (45=1) (47=1) (48=1) (49=1) (60=1) (65=1) (69=1) (71=1) (72=1) (81=1) (83=1) (84=1) (85=1) (86=1) (88=1) (89=1) (96=1) (108=1) (109=1) (111=1) (117=1) (nonm = 0), gen(Abbot_SchoolDist)
 // recodes DistrictName2 to identify Abbot School as 1 and NON-Abbot School as 0 then generates new var "Abbot_SchoolDist" to show this (with new data mergers this had to be redone) //
 
-drop CountyName DistrictCode DistrictName StudentGroup ELAMetTar2016_17 ELAAnnTar2016_17 ELAStatePerf2016_17 ELAValidScores2016_17 MATHMetTar2016_17 MATHAnnTar2016_17 MATHStatePerf2016_17 MATHValidScores2016_17 MATHMetTar2017_18 MATHAnnTar2017_18 MATHStatePerf2017_18 MATHValidScores2017_18 ELAMetTar2017_18 ELAAnnTar2017_18 ELAStatePerf2017_18 ELAValidScores2017_18 CountyCode
+drop CountyName CountyCode DistrictName StudentGroup ELAMetTar* ELAAnnTar* ELAStatePerf* ELAValidScores* MATHMetTar* MATHAnnTar* MATHStatePerf* MATHValidScores*
 order CountyName2 DistrictName2 Abbot_SchoolDist StudentGroup2 ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
 
 save Education_Data_TOTAL_2, replace // Saves manipulated Data //
+
+*______________________________________________________________________________*
+* This section shows some descriptive statistics to better familiarize ourselves with the data. *
+
+use Education_Data_TOTAL_2, clear
+keep if StudentGroup2==4
+
+foreach d in ELADisPerf*  MATHDisPerf*{
+sum `d', d
+}
+// For the 2016-2017 school year on average 53% of New Jersey school districts met or exceed expectations on English language arts standardized exams. On the math portion of the exam school districts scored signficantly lower on average with 40.7% meeting or exceeding expectations.
+// For the 2017-2018 school year on average 53.6% New Jersey school districts met or exceed expectations on English language arts standardized exams, similar to the year prior. On the math portion of the exam school districts scored signficantly lower on average with 41.9% meeting or exceeding expectations, a slight increase.
+// Each year shows similar distributions per each subject, with ELA test scores consistently being higher over math scores over the two year period.
 
 *______________________________________________________________________________*
 * The purpose of this code is select a random sample to run descriptive statistics on. *
 
 use Education_Data_TOTAL_2, clear // Tells Stata to use manipulated Data // 
 
-keep ELADisPerf2017_18 MATHDisPerf2017_18 DistrictName2 StudentGroup2 Abbot_SchoolDist //Tells Stata which varibles to keep //
+keep ELADisPerf* MATHDisPerf* DistrictName2 StudentGroup2 Abbot_SchoolDist //Tells Stata which varibles to keep //
 keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
-order DistrictName2 StudentGroup2 ELADisPerf2017_18 MATHDisPerf2017_18 Abbot_SchoolDist // Orders Data in an easily digestable manner //
+order DistrictName2 StudentGroup2 ELADisPerf* MATHDisPerf* Abbot_SchoolDist // Orders Data in an easily digestable manner //
 
-sort DistrictName2 // Sorts DistrictName2 Alphabetically //
-set seed 123456789 // Sets randomness to a constant //
-sample 50, count // takes a random sample of 50 observations //
+collapse ELADisPerf* MATHDisPerf* Abbot_SchoolD,by(DistrictName2) 
 
-collapse ELADisPerf2017_18 MATHDisPerf2017_18 Abbot_SchoolD,by(DistrictName2) 
-
-bys DistrictName2: sum *DisPerf2017_18 // This provides basic statistics on a random sample of school districts in New Jersey //
+bys DistrictName2: sum *DisPerf* // This provides basic statistics on a random sample of school districts in New Jersey //
 
 *______________________________________________________________________________*
 *The purpose of this code is compare student achievement between Abbot Schools and Non-Abbot Schools in the 2017-2018 school year.*
@@ -428,7 +426,9 @@ order DistrictName2 StudentGroup2 Year ExpPerPupil // Orders the data //
 // **Beginning of PS4** ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// This will all soon be streamlined greatly through macros and loops by the time PS5 is due.
+// For Problem Set 4 I began to work on the final project by organzing previous code to clean data and by simplifying where possible. From current graphs I have found interesting visualization from the data by demographics when comparing Abbot schools and Non-Abbot schools. Surpringly, though it is a limited viewed, an increase in state aid in Abbot schools does seem to positively correlate with student outcomes on standardizes testing. 
+
+//With the addition of the public health data it is clear there are many issues with the communities these school districts occupy as it relates to their health. Since extra spending in Abbot schools do seem to increase student outcomes it opens a wide variety of interesting policy opportunities to help students by tackling issues realted public health in these communities.  
 
 use Education_Data_TOTAL_2, clear
 
@@ -463,13 +463,18 @@ use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
 keep if StudentGroup2==4
 
-tw (scatter ELADisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_ELA_2016_2017)
+tw (scatter ELADisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_ELA_2016_2017) 
+//There seems to be an outlier here skewing the data higher, lets take a look
+ta DistrictName2 if ExpPerPupil2016_17>25000
+// Asbury Park City school district seems to be the outlier, for some reason they spend quite a large amount per student on average in their school districts.
 
-tw (scatter ELADisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit ELADisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_ELA_2017_2018)
+tw (scatter ELADisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit ELADisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_ELA_2017_2018) // Extremely small positive correlation here, the data seems to be loosely scattered
 
-tw (scatter MATHDisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_MATH_2016_2017)
+tw (scatter MATHDisPerf2016_17 ExpPerPupil2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures_MATH_2016_2017) // Again we see the outlier Asbury Park City here.
 
-tw (scatter MATHDisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_MATH_2017_2018)
+tw (scatter MATHDisPerf2017_18 ExpPerPupil2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures_MATH_2017_2018) // Slight positive correlation here.
+
+//Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there negative correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight.
 
 *______________________________________________________________________________*
 ***Smoking Relationship w/ Grades***
@@ -481,6 +486,8 @@ tw (scatter MATHDisPerf2016_17 AdultSmoking2016_17, msize(vsmall))(lfit MATHDisP
 
 tw (scatter MATHDisPerf2017_18 AdultSmoking2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 AdultSmoking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking_MATH_2017_2018)
 
+// The percentage population of smokers in a community does seem to have a negative impact on student outcomes overall, with a strange instance of it a relationship in the 2017-2018 school year. As the percent population smoking increases, so does math test scores.
+
 *______________________________________________________________________________*
 **Obesity Relationship w/ Grades
 tw (scatter ELADisPerf2016_17 AdultObesity2016_17, msize(vsmall))(lfit ELADisPerf2016_17 AdultObesity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity_ELA_2016_2017)
@@ -490,6 +497,8 @@ tw (scatter ELADisPerf2017_18 AdultObesity2017_18, msize(vsmall))(lfit ELADisPer
 tw (scatter MATHDisPerf2016_17 AdultObesity2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 AdultObesity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity_MATH_2016_2017)
 
 tw (scatter MATHDisPerf2017_18 AdultObesity2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 AdultObesity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity_MATH_2017_2018)
+
+//Strong negative correlations across the board here. It presents the neccessity for more research on the individual health of each school districts students and their families. Also opens up a study for what these school districts are providing their students for food during the school day. Many are most likely on free or reduced lunch, and many school lunch services are privatized. Do privatized lunch services have a negative effect on a students health/learning outcomes?
 
 *______________________________________________________________________________*
 **Physical Inactivity Relationship w/ Grades
@@ -501,6 +510,8 @@ tw (scatter MATHDisPerf2016_17 PhysicalInactivity2016_17, msize(vsmall))(lfit MA
 
 tw (scatter MATHDisPerf2017_18 PhysicalInactivity2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 PhysicalInactivity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactivity_MATH_2017_2018)
 
+//Again, negative correlations across the board here, yet slightly less so than the relationship between test scores and obesity. Perhaps during the periods of inactivity they're doing school related activities.
+
 *______________________________________________________________________________*
 **Excessive Drinking Relationship w/ Grades
 tw (scatter ELADisPerf2016_17 ExcessiveDrinking2016_17, msize(vsmall))(lfit ELADisPerf2016_17 ExcessiveDrinking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking_ELA_2016_2017)
@@ -510,6 +521,8 @@ tw (scatter ELADisPerf2017_18 ExcessiveDrinking2017_18, msize(vsmall))(lfit ELAD
 tw (scatter MATHDisPerf2016_17 ExcessiveDrinking2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 ExcessiveDrinking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking_MATH_2016_2017)
 
 tw (scatter MATHDisPerf2017_18 ExcessiveDrinking2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ExcessiveDrinking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking_MATH_2017_2018)
+
+//Strange positive correlations here. One would imagine as drinking of the population increases test schools of the surrounding students decrease. However some counties with the highest percentage of excess drinkers are some of the best performing. Further investigation is required to understand this relationship. 
 
 *______________________________________________________________________________*
 **Teen Birth Relationship w/ Grades
@@ -521,6 +534,8 @@ tw (scatter MATHDisPerf2016_17 TeenBirths2016_17, msize(vsmall))(lfit MATHDisPer
 
 tw (scatter MATHDisPerf2017_18 TeenBirths2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 TeenBirths2017_18), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirths_MATH_2017_2018)
 
+// The data suggests that as teen pregenancy increase there is a decrease in test scores. This makes logical sense, teenage pregenancies usually take a toll on the ability to meet academic obligations in order to take care of a child leading to things like students failing or dropping out entirely. Interesting policy ideas here, perhaps a contraceptive campaign for students and the communities they operate in. 
+
 *______________________________________________________________________________*
 **Single Parent Household Relationship w/ Grades
 tw (scatter ELADisPerf2016_17 SingleParentHouse2016_17, msize(vsmall))(lfit ELADisPerf2016_17 SingleParentHouse2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent_ELA_2016_2017)
@@ -530,6 +545,8 @@ tw (scatter ELADisPerf2017_18 SingleParentHouse2017_18, msize(vsmall))(lfit ELAD
 tw (scatter MATHDisPerf2016_17 SingleParentHouse2016_17, msize(vsmall))(lfit MATHDisPerf2016_17 SingleParentHouse2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent_MATH_2016_2017)
 
 tw (scatter MATHDisPerf2017_18 SingleParentHouse2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 SingleParentHouse2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent_MATH_2017_2018)
+
+// These graphs suggest that as the percentage of single parent households increase, student standardize test scores decrease. The relationship here is not a strong as I would have expected however, and possibly not as much of a policy concern for lawmakers.
 
 *______________________________________________________________________________*
 **Violent Crime Rate Relationship w/ Grades
@@ -541,3 +558,4 @@ tw (scatter MATHDisPerf2016_17 ViolentCrime2016_17, msize(vsmall))(lfit MATHDisP
 
 tw (scatter MATHDisPerf2017_18 ViolentCrime2017_18, msize(vsmall))(lfit MATHDisPerf2017_18 ViolentCrime2017_18), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime_MATH_2017_2018)
 
+//Unsurprisngly, as violent crime increaes in communities, test scores suffer. 
