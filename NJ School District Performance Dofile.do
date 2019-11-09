@@ -6,7 +6,6 @@
 
 // My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbot School Districts compared to non-Abott School Districts.
 
-*______________________________________________________________________________*
 
 ////////////////////////////////////////////////////////////////////////////////
 // **Beginning of PS1** ////////////////////////////////////////////////////////
@@ -178,6 +177,11 @@ drop if DistrictName == "Northern Region Educational Services Commission"
 drop _merge
 // Here we found some non-mergers that we'll be dropping. The first set of non-mergers are charter schools that weren't recorded from one year to another within the data set. This likely because they have either just opened, or have recently closed down operations. Since the purpose of this research is not focused on charter schools and to ensure the data set is as clean and accurate as possible we'll be dropping them. The other form of non-mergers found here are education agencies that are recorded by the New Jersey Department of Education but do not recieve funding from the state, therefore they do not have any impact on our data set and can be dropped. //or education agencies that the New Jersey Department of Education . 
 
+/*not necessary but arguably a good idea: you merged in these m:1 with stuff like female, disabled, etc--you used to have a 
+clean u/a: district but now its kindof messy/unwieldy where u/a is district-female, district-disabled etc, so perhaps you should
+reshape wide on these categories so that we have u/a district again and have scores etc for female, disabled etc in columns
+*/
+
 save Education_Data_2_Years_Cleaned, replace
 
 *______________________________________________________________________________*
@@ -197,6 +201,11 @@ ren D DistrictName // Renames variable to DistrictName //
 ren E TotalPop2016_17 // Renames variable to the total population of the school district in the 2017-2018 school year //
 ren F TotalStudentPop2016_17 //Renames varialbe to the total population of students in each school district //
 ren G PovertyStudentPop2016_17 // Renames variable to the population of students per school district that live in poverty //
+
+
+//yeah but the question is why they are repeats in the first place:
+edit if DistrictName==DistrictName[_n-1] 
+//doesnt seem like mistake/typo in data, have like 16 of them, wondering why?
 
 drop if DistrictName==DistrictName[_n-1] // This make sure there are no invisible spaces between or outside of string characters to help with merging //
 
@@ -244,6 +253,7 @@ drop DistrictName // Drops the original DistrictName variable that was not manip
 ren stock_prefix DistrictName // Renames the manipuated observation variable back to DistrictName //
 order DistrictName // Order the data to more easily visualize //
 
+//again, as discussed in class, the following may be correct now, but is dangerous and likely to result in mistake in the future!
 replace DistrictName = "EAST ORANGE" in 111
 replace DistrictName = "KEANSBURG BORO" in 220
 replace DistrictName = "NEPTUNE TWP" in 321
@@ -350,7 +360,14 @@ use Education_Data_TOTAL, clear // Loads Data //
 foreach v in StudentGroup DistrictName CountyName{
 encode `v', gen(`v'2)
 } // Generates variable "StudentGroup2" "DistrictName2" "CountyName2" as same variable but with numeric values associated with each category //
+//this is fine, but perhaps little better use N suffix (for Numeric) as opposed to 2, would be cleaner
 
+//again as discussed in class, these could be made as strings eg
+/*
+gen recoded=.
+replace recoded=1 if DistrictName=="name here"
+//and so on
+*/
 recode DistrictName2 (2=1) (11=1) (14=1) (16=1) (20=1) (26=1) (29=1) (33=1) (35=1) (42=1) (45=1) (47=1) (48=1) (49=1) (60=1) (65=1) (69=1) (71=1) (72=1) (81=1) (83=1) (84=1) (85=1) (86=1) (88=1) (89=1) (96=1) (108=1) (109=1) (111=1) (117=1) (nonm = 0), gen(Abbot_SchoolDist)
 // recodes DistrictName2 to identify Abbot School as 1 and NON-Abbot School as 0 then generates new var "Abbot_SchoolDist" to show this (with new data mergers this had to be redone) //
 
@@ -451,6 +468,7 @@ gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17 // In the
 
 *______________________________________________________________________________*
 **Student Poverty Rates Relationship w/ Grades
+//consider using mlab option to label points to spot outliers
 use Education_Data_TOTAL_2, clear
 foreach v of varlist MATHDisPerf2017_18 ELADisPerf2017_18{
 tw (scatter `v' PercStudPovPop2017_18, msize(vsmall))(lfit `v' PercStudPovPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Student Population in Poverty) title(2017-2018 School Year) name(Poverty`v', replace)
@@ -585,9 +603,11 @@ use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
 keep if StudentGroup2==4
 
+//per regressions see https://www.princeton.edu/~otorres/Regression101.pdf
+
 foreach v in PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 ExpPerPupil2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17{
 reg `v' ELADisPerf2016_17, robust
-outreg2 using myreg.doc, replace ctitle(`v')
+outreg2 using myreg.doc, replace ctitle(`v') //no, this doesnt make sense, should be append not replace
 }
 //Runs regressions for all variables with ELA test scores in the 2016-2017 school year
 
