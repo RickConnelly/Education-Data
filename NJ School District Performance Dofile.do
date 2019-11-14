@@ -6,6 +6,7 @@
 
 // My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbot School Districts compared to non-Abott School Districts.
 
+*______________________________________________________________________________*
 
 ////////////////////////////////////////////////////////////////////////////////
 // **Beginning of PS1** ////////////////////////////////////////////////////////
@@ -177,11 +178,6 @@ drop if DistrictName == "Northern Region Educational Services Commission"
 drop _merge
 // Here we found some non-mergers that we'll be dropping. The first set of non-mergers are charter schools that weren't recorded from one year to another within the data set. This likely because they have either just opened, or have recently closed down operations. Since the purpose of this research is not focused on charter schools and to ensure the data set is as clean and accurate as possible we'll be dropping them. The other form of non-mergers found here are education agencies that are recorded by the New Jersey Department of Education but do not recieve funding from the state, therefore they do not have any impact on our data set and can be dropped. //or education agencies that the New Jersey Department of Education . 
 
-/*not necessary but arguably a good idea: you merged in these m:1 with stuff like female, disabled, etc--you used to have a 
-clean u/a: district but now its kindof messy/unwieldy where u/a is district-female, district-disabled etc, so perhaps you should
-reshape wide on these categories so that we have u/a district again and have scores etc for female, disabled etc in columns
-*/
-
 save Education_Data_2_Years_Cleaned, replace
 
 *______________________________________________________________________________*
@@ -202,17 +198,12 @@ ren E TotalPop2016_17 // Renames variable to the total population of the school 
 ren F TotalStudentPop2016_17 //Renames varialbe to the total population of students in each school district //
 ren G PovertyStudentPop2016_17 // Renames variable to the population of students per school district that live in poverty //
 
-
-//yeah but the question is why they are repeats in the first place:
-edit if DistrictName==DistrictName[_n-1] 
-//doesnt seem like mistake/typo in data, have like 16 of them, wondering why?
-
-drop if DistrictName==DistrictName[_n-1] // This make sure there are no invisible spaces between or outside of string characters to help with merging //
+drop if DistrictName==DistrictName[_n-1] // This drops all repeats of a school district in this data set. From further investigation school districts that repeat are Fairfield Township School District, Franklin Township School District, Greenwich Township School District, Hamilton Township School District, Lawrence Township School District, Mansfield Township School District, Monroe Township School District, Ocean Township School District, Springfield Township School District, Union Township School District, and Washington Township School District. Refering to the codebook or any other material listed on the census website it is unclear why these school districts repeat. Since none of them are our primary focus we wil just keep one of each of them for merging purposes with the caveat these may not be the most accurate sources. Should later research questions involve these school districts contact to the census into why the repeats occur will be necessary. 
 
 destring *, replace
 
 gen prop=PovertyStudentPop2016_17/TotalStudentPop2016_17 * 100 // Controls for population //
-ren prop PercStudPovPop2016_17
+ren prop PercStudPovPop2016_17 
  
 save NJ_Poverty_2016_17, replace
 
@@ -230,7 +221,7 @@ ren E TotalPop2017_18 // Renames variable to the total population of the school 
 ren F TotalStudentPop2017_18 //Renames varialbe to the total population of students in each school district //
 ren G PovertyStudentPop2017_18 // Renames variable to the population of students per school district that live in poverty //
 
-drop if DistrictName==DistrictName[_n-1] // This make sure there are no invisible spaces between or outside of string characters to help with merging //
+drop if DistrictName==DistrictName[_n-1] // see line 201
 
 destring *, replace
 
@@ -253,12 +244,11 @@ drop DistrictName // Drops the original DistrictName variable that was not manip
 ren stock_prefix DistrictName // Renames the manipuated observation variable back to DistrictName //
 order DistrictName // Order the data to more easily visualize //
 
-//again, as discussed in class, the following may be correct now, but is dangerous and likely to result in mistake in the future!
-replace DistrictName = "EAST ORANGE" in 111
-replace DistrictName = "KEANSBURG BORO" in 220
-replace DistrictName = "NEPTUNE TWP" in 321
-replace DistrictName = "CITY OF ORANGE TWP" in 358
-replace DistrictName = "PEMBERTON TWP" in 371
+replace DistrictName = "EAST ORANGE" if DistrictName == "EAST ORANGE CITY"
+replace DistrictName = "KEANSBURG BORO" if DistrictName == "KEANSBURG BOROUGH"
+replace DistrictName = "NEPTU1NE TWP" if DistrictName == "NEPTUNE TOWNSHIP"
+replace DistrictName = "CITY OF ORANGE TWP" if DistrictName == "ORANGE CITY TOWNSHIP"
+replace DistrictName = "PEMBERTON TWP" if DistrictName == "PEMBERTON TOWNSHIP"
 // We want to make sure that the Abbot Schools we want to study merge properly. To make sure that happens I have mannually changed the school district names that did not uniquely identify with the master data set and thus would not have merged. With these mannual changes each school we want to study will have the correct data associated with it. //
 
 save NJ_Poverty_Two_Years, replace // Saves the merged poverty data //
@@ -277,7 +267,7 @@ save Education_Data_Scores_Expenditures_Poverty, replace
 *_____________________________________________________________________________________________*
 // This data was imported from County Health Rankings & Roadmaps. Link to the data can be found here: https://www.countyhealthrankings.org/app/new-jersey/2016/downloads //
 
-import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2017%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v2.xls", sheet("Ranked Measure Data") clear // Imports the excel directly from the County Health Rankings & Roadmaps, and pulls directly from the sheet titled Ranked Measure Data. //
+import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2017%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v2.xls", sheet("Ranked Measure Data") cellrange(A4:FF24) clear // Imports the excel directly from the County Health Rankings & Roadmaps, and pulls directly from the sheet titled Ranked Measure Data. //
 
 ren C CountyName
 ren AB AdultSmoking2016_17 // Percent of population (audlts) who smoke per county //
@@ -290,13 +280,11 @@ ren EE ViolentCrime2016_17 // Violent Crime rate per county //
 
 keep CountyName AdultSmoking2016_17 AdultObesity2016_17 PhysicalInactivity2016_17 ExcessiveDrinking2016_17 TeenBirths2016_17 SingleParentHouse2016_17 ViolentCrime2016_17 // This keeps the variables we wish to merge into master dataset //
 
-drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above //
-
 save Public_health_2016_17, replace
 
 *_____________________________________________________________________________________________*
 
-import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2018%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v3.xls", sheet ("Ranked Measure Data") clear
+import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2018%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v3.xls", sheet ("Ranked Measure Data") cellrange(A4:FI24) clear
 
 ren C CountyName
 ren AE AdultSmoking2017_18 // Percent of population (audlts) who smoke per county //
@@ -308,8 +296,6 @@ ren DY SingleParentHouse2017_18 // Number of Single-Parent Households per county
 ren EG ViolentCrime2017_18 // Number of Violent Crimes per county //
 
 keep CountyName AdultSmoking2017_18 AdultObesity2017_18 PhysicalInactivity2017_18 ExcessiveDrinking2017_18 TeenBirths2017_18 SingleParentHouse2017_18 ViolentCrime2017_18 // This keeps the variables we wish to merge into master dataset
-
-drop in 1/3 // This drops the headings and descriptions that were present in the excel file of the data that were renamed above.
 
 save Public_health_2017_18, replace
 
@@ -357,22 +343,82 @@ clear //clears Stata //
 
 use Education_Data_TOTAL, clear // Loads Data //
 
-foreach v in StudentGroup DistrictName CountyName{
-encode `v', gen(`v'2)
-} // Generates variable "StudentGroup2" "DistrictName2" "CountyName2" as same variable but with numeric values associated with each category //
-//this is fine, but perhaps little better use N suffix (for Numeric) as opposed to 2, would be cleaner
+gen Abbot_SchoolDist=0 //Generates new variable so we can idenfity Abbott Schools vs. Non-Abbott Schools
 
-//again as discussed in class, these could be made as strings eg
-/*
-gen recoded=.
-replace recoded=1 if DistrictName=="name here"
-//and so on
-*/
-recode DistrictName2 (2=1) (11=1) (14=1) (16=1) (20=1) (26=1) (29=1) (33=1) (35=1) (42=1) (45=1) (47=1) (48=1) (49=1) (60=1) (65=1) (69=1) (71=1) (72=1) (81=1) (83=1) (84=1) (85=1) (86=1) (88=1) (89=1) (96=1) (108=1) (109=1) (111=1) (117=1) (nonm = 0), gen(Abbot_SchoolDist)
-// recodes DistrictName2 to identify Abbot School as 1 and NON-Abbot School as 0 then generates new var "Abbot_SchoolDist" to show this (with new data mergers this had to be redone) //
+replace Abbot_SchoolDist=1 if DistrictName== "ASBURY PARK CITY""BURLINGTON CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "BRIDGETON CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "BURLINGTON CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "CAMDEN CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "CITY OF ORANGE TWP"
+replace Abbot_SchoolDist=1 if DistrictName== "EAST ORANGE"
+replace Abbot_SchoolDist=1 if DistrictName== "ELIZABETH CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "GARFIELD CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "GLOUCESTER CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "HARRISON TOWN"
+replace Abbot_SchoolDist=1 if DistrictName== "HOBOKEN CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "IRVINGTON TOWNSHIP"
+replace Abbot_SchoolDist=1 if DistrictName== "JERSEY CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "KEANSBURG BORO"
+replace Abbot_SchoolDist=1 if DistrictName== "LONG BRANCH CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "MILLVILLE CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "NEPTUNE CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "NEWARK CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "NEW BRUNSWICK CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "PASSAIC CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "PATERSON CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "PEMBERTON TWP"
+replace Abbot_SchoolDist=1 if DistrictName== "PERTH AMBOY CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "PHILLIPSBURG TOWN"
+replace Abbot_SchoolDist=1 if DistrictName== "PLEASANTVILLE CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "SALEM CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "TRENTON CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "UNION CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "VINELAND CITY"
+replace Abbot_SchoolDist=1 if DistrictName== "WEST NEW YORK TOWN"
+replace Abbot_SchoolDist=1 if DistrictName== "PLAINFIELD CITY"
+// This codes each Abbott School as 1 for easy sorting and idenfication later on //
+
+foreach v in StudentGroup DistrictName CountyName{
+encode `v', gen(`v'N)
+} // Generates variable "StudentGroupN" "DistrictNameN" "CountyNameN" as same variable but with numeric values associated with each category //
 
 drop CountyName CountyCode DistrictName StudentGroup ELAMetTar* ELAAnnTar* ELAStatePerf* ELAValidScores* MATHMetTar* MATHAnnTar* MATHStatePerf* MATHValidScores*
-order CountyName2 DistrictName2 Abbot_SchoolDist StudentGroup2 ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
+order CountyNameN DistrictNameN Abbot_SchoolDist StudentGroupN ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
+
+la var Abbot_SchoolDist "1=Abbott School 0=Non-Abbott School"
+la var StudentGroupN "Student Demographic"
+la var ELAParticPerc2017_18 "% Student Demographic Participation in ELA 2017-2018" 
+la var ELADisPerf2017_18 "District Performance in ELA 2017-2018"
+la var MATHParticPerc2017_18 "% Student Demographic Participation in Math 2017-2018"
+la var MATHDisPerf2017_18 "District Performance in Math 2017-2018"
+la var ExpPerPupil2017_18 "Expenditures Per Pupil 2017-2018"
+la var ELAParticPerc2016_17 "% Student Demographic Participation in ELA 2016-2017"
+la var ELADisPerf2016_17 "District Performance in ELA 2016-2017"
+la var MATHParticPerc2016_17 "% Student Demographic Participation in Math 2016-2017" 
+la var MATHDisPerf2016_17 "District Performance in Math 2016-2017"
+la var ExpPerPupil2016_17 "Expenditures Per Pupil 2016-2017"
+la var TotalPop2017_18 "Total County Population 2017-2018 per County"
+la var TotalStudentPop2017_18 "Total Student Population 2017-2018 per County"
+la var PovertyStudentPop2017_18 "Total Student Population in Poverty 2017-2018 per County"
+la var PercStudPovPop2017_18 "% Student Population in Poverty 2017-2018 per County"
+la var TotalPop2016_17 "Total County Population 2016-2017 per County"
+la var TotalStudentPop2016_17 "Total Student Population 2016-2017 per County"
+la var PovertyStudentPop2016_17 "Total Student Population in Poverty 2016-2017 per County"
+la var PercStudPovPop2016_17 "% Student Population in Poverty 2016-2017 per County"
+la var AdultSmoking2016_17 "% Population of Adult Smokers per County 2016-2017"
+la var AdultObesity2016_17 "% Population of Adult Obesity per County 2016-2017"
+la var PhysicalInactivity2016_17 "% Population of Adult Inactivity per County 2016-2017"
+la var ExcessiveDrinking2016_17 "% Population of Excessive Drinking per County 2016-2017"
+la var TeenBirths2016_17 "% Population of Teen Births per County 2016-2017"
+la var SingleParentHouse2016_17 "% Population of Single Parent Households per County 2016-2017"
+la var ViolentCrime2016_17 "Violent Crime Rates per County 2016-2017"
+la var AdultSmoking2017_18 "% Population of Adult Smokers per County 2017-2018"
+la var AdultObesity2017_18 "% Population of Adult Obesity per County 2017-2018"
+la var PhysicalInactivity2017_18 "% Population of Adult Inactivity per County 2017-2018"
+la var ExcessiveDrinking2017_18 "% Population of Excessive Drinking per County 2017-2018"
+la var TeenBirths2017_18 "% Population of Teen Births per County 2017-2018"
+la var SingleParentHouse2017_18 "% Population of Single Parent Households per County 2017-2018"
+la var ViolentCrime2017_18 "Violent Crime Rates per County 2016-2017"
 
 save Education_Data_TOTAL_2, replace // Saves manipulated Data //
 
@@ -380,13 +426,12 @@ save Education_Data_TOTAL_2, replace // Saves manipulated Data //
 * This section shows some descriptive statistics to better familiarize ourselves with the data. *
 
 use Education_Data_TOTAL_2, clear
-keep if StudentGroup2==4
+keep if StudentGroupN==4
 
-foreach d in ELADisPerf*  MATHDisPerf*{
-sum `d', d
-}
-// For the 2016-2017 school year on average 53% of New Jersey school districts met or exceed expectations on English language arts standardized exams. On the math portion of the exam school districts scored signficantly lower on average with 40.7% meeting or exceeding expectations.
-// For the 2017-2018 school year on average 53.6% New Jersey school districts met or exceed expectations on English language arts standardized exams, similar to the year prior. On the math portion of the exam school districts scored signficantly lower on average with 41.9% meeting or exceeding expectations, a slight increase.
+loc v ELADisPerf2016_17 MATHDisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2017_18
+sum `v',d
+// For the 2016-2017 school year on average 53.6% of New Jersey school districts met or exceed expectations on English language arts standardized exams. On the math portion of the exam school districts scored signficantly lower on average with 41.8% meeting or exceeding expectations.
+// For the 2017-2018 school year on average 53% New Jersey school districts met or exceed expectations on English language arts standardized exams, similar to the year prior. On the math portion of the exam school districts scored signficantly lower on average with 40.9% meeting or exceeding expectations, a slight decrease.
 // Each year shows similar distributions per each subject, with ELA test scores consistently being higher over math scores over the two year period.
 
 *______________________________________________________________________________*
@@ -394,57 +439,57 @@ sum `d', d
 
 use Education_Data_TOTAL_2, clear // Tells Stata to use manipulated Data // 
 
-keep ELADisPerf* MATHDisPerf* DistrictName2 StudentGroup2 Abbot_SchoolDist //Tells Stata which varibles to keep //
-keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
-order DistrictName2 StudentGroup2 ELADisPerf* MATHDisPerf* Abbot_SchoolDist // Orders Data in an easily digestable manner //
+keep ELADisPerf* MATHDisPerf* DistrictNameN StudentGroupN Abbot_SchoolDist //Tells Stata which varibles to keep //
+keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
+order DistrictNameN StudentGroupN ELADisPerf* MATHDisPerf* Abbot_SchoolDist // Orders Data in an easily digestable manner //
 
-collapse ELADisPerf* MATHDisPerf* Abbot_SchoolD,by(DistrictName2) 
+collapse ELADisPerf* MATHDisPerf* Abbot_SchoolD,by(DistrictNameN) 
 
-bys DistrictName2: sum *DisPerf* // This provides basic statistics on a random sample of school districts in New Jersey //
+bys DistrictNameN: sum *DisPerf* // This provides basic statistics on a random sample of school districts in New Jersey //
 
 *______________________________________________________________________________*
 *The purpose of this code is compare student achievement between Abbot Schools and Non-Abbot Schools in the 2017-2018 school year.*
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
-keep ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 DistrictName2 StudentGroup2 Abbot_SchoolDist // Tells Stata keep these specific variables //
-keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
+keep ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
+keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
 
-collapse  ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 Abbot_SchoolD,by(DistrictName2) // This collpases all demographics in each school district into the average standardized test scores for but ELA and Math with an Abbot school designation associated with each district shown in "Abbot_SchoolD".
+collapse  ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 Abbot_SchoolD,by(DistrictNameN) // This collpases all demographics in each school district into the average standardized test scores for but ELA and Math with an Abbot school designation associated with each district shown in "Abbot_SchoolD".
 
 bys Abbot_SchoolD: sum *DisPerf2017_18 *DisPerf2016_17 // This sorts each school district into an Abbot School or Non-Abbot school, then tabulates the percentage of students who met or exceeded expectations to provide descriptive statistics on student achievement comparing the two types of school districts. // 
 
 keep if Abbot_SchoolDist==0
-ta DistrictName2 if MATHDisPerf2017_18<=11 // This details an investigation of a possible outlier on the lowest percentile of students who met or exceeded expectations in math testing (only 11% of students met or exceed expectations) from a non-Abbot school district. The school district responsbile for such low scores is the Trenton City School District. It's likely the same factors contributing to poor test results as Abbot schools are contributing to the poor results of the Egg Harbor School district. More research is required to determine if this is true. //
+ta DistrictNameN if MATHDisPerf2017_18<=11 // This details an investigation of a possible outlier on the lowest percentile of students who met or exceeded expectations in math testing (only 11% of students met or exceed expectations) from a non-Abbott school district. The school district responsbile for such low scores is the Trenton City School District. It's likely the same factors contributing to poor test results as Abbot schools are contributing to the poor results of the Egg Harbor School district. More research is required to determine if this is true. //
 
 *______________________________________________________________________________*
 *This sections shows the district wide test scores for each demographic throughout each Abbot School. *
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
-keep DistrictName2 StudentGroup2 MATHDisPerf2016_17 MATHDisPerf2017_18 ELADisPerf2016_17 ELADisPerf2017_18 StudentGroup2 Abbot_SchoolDist // Tells Stata keep these specific variables //
+keep DistrictNameN StudentGroupN MATHDisPerf2016_17 MATHDisPerf2017_18 ELADisPerf2016_17 ELADisPerf2017_18 StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
 
 keep if Abbot_SchoolDist == 1 // Drops all Non-Abbot Schools
 drop Abbot_SchoolDist // Drops the numeric repsentation for an Abbot School //
 
-collapse ELADisPerf2017_18 MATHDisPerf2017_18 ELADisPerf2016_17 MATHDisPerf2016_17,by(StudentGroup2) // This shows how each demographic scored on standardized tests in Abbot Schools. On average, Black or African American students score lower on both math and reading than White students. Female students score signficantly higher than male students on the ELA portion of the test while male students score higher on the math portion than females. Interestingly, the demographic that scored the lowest are migrant students. Initally I had wondered if the reason behind this was that the tests were only administered in English. However, further research shows PARCC testing is adminstered in 10 languages suggesting the test was adminstered in the migrant student's native language. 
+collapse ELADisPerf2017_18 MATHDisPerf2017_18 ELADisPerf2016_17 MATHDisPerf2016_17,by(StudentGroupN) // This shows how each demographic scored on standardized tests in Abbot Schools. On average, Black or African American students score lower on both math and reading than White students. Female students score signficantly higher than male students on the ELA portion of the test while male students score higher on the math portion than females. Interestingly, the demographic that scored the lowest are migrant students. Initally I had wondered if the reason behind this was that the tests were only administered in English. However, further research shows PARCC testing is adminstered in 10 languages suggesting the test was adminstered in the migrant student's native language. 
 
 // **Continuation of PS3** ////////////////////////////////////////////////////////
 
-reshape long ELADisPerf MATHDisPerf, i(StudentGroup2) j(Year) string // Reshapes data to long format  //
+reshape long ELADisPerf MATHDisPerf, i(StudentGroupN) j(Year) string // Reshapes data to long format  //
 
 *______________________________________________________________________________*
 *This section shows the changes in aid over the two year period and reshapes the data. *
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
-keep ExpPerPupil2016_17 ExpPerPupil2017_18 DistrictName2 StudentGroup2 Abbot_SchoolDist // Tells Stata keep these specific variables //
-keep if StudentGroup2 == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
+keep ExpPerPupil2016_17 ExpPerPupil2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
+keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
 keep if Abbot_SchoolDist == 1 // This tells Stata to keep only Abbot Schools
 
 drop Abbot_SchoolDist // Drops unnecessary variable //
-reshape long ExpPerPupil, i(DistrictName2) j(Year) string //Reshapes data to long format //
-order DistrictName2 StudentGroup2 Year ExpPerPupil // Orders the data //
+reshape long ExpPerPupil, i(DistrictNameN) j(Year) string //Reshapes data to long format //
+order DistrictNameN StudentGroupN Year ExpPerPupil // Orders the data //
 
 *______________________________________________________________________________*
 
@@ -459,7 +504,7 @@ order DistrictName2 StudentGroup2 Year ExpPerPupil // Orders the data //
 use Education_Data_TOTAL_2, clear
 
 foreach v of varlist MATHDisPerf2017_18 MATHDisPerf2016_17 ELADisPerf2016_17 ELADisPerf2017_18{
-gr hbar (mean) `v', over(Abbot_SchoolDist, sort(`v') label(labsize(tiny))) over(StudentGroup2, label(labsize(tiny))) name(Demographic`v',replace)
+gr hbar (mean) `v', over(Abbot_SchoolDist, sort(`v') label(labsize(tiny))) over(StudentGroupN, label(labsize(tiny))) name(Demographic`v',replace)
 }
 //This shows each school years Math and ELA test scores (% met or exceeded expectations) side by side sorting on whether the school district is an Abbot Shool or not. 0 = Non-Abbot 1 = Abbot. The spread here is generally what we would expect. Abbot school are performing by and large lower than non-Abbot schools. There are some interesting caveats however. //
 
@@ -467,8 +512,12 @@ gr combine DemographicMATHDisPerf2017_18 DemographicELADisPerf2017_18 // In the 
 gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17 // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
+
+////////////////////////////////////////////////////////////////////////////////
+// **Beginning of PS5** ////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 **Student Poverty Rates Relationship w/ Grades
-//consider using mlab option to label points to spot outliers
 use Education_Data_TOTAL_2, clear
 foreach v of varlist MATHDisPerf2017_18 ELADisPerf2017_18{
 tw (scatter `v' PercStudPovPop2017_18, msize(vsmall))(lfit `v' PercStudPovPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Student Population in Poverty) title(2017-2018 School Year) name(Poverty`v', replace)
@@ -483,148 +532,161 @@ gr combine PovertyELADisPerf2017_18 PovertyELADisPerf2016_17,col(1) title(ELA Te
 *______________________________________________________________________________*
 **Expenditures per Pupil Relationship w/ Grades
 use Education_Data_TOTAL_2, clear
-keep if Abbot_SchoolDist==1
-keep if StudentGroup2==4
+keep if StudentGroupN==4 
 
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' ExpPerPupil2016_17, msize(vsmall))(lfit `v' ExpPerPupil2016_17), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures`v',replace) 
+tw (scatter `v' ExpPerPupil2016_17, msize(vsmall))(lfit `v' ExpPerPupil2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures`v'_`a',replace)
+}
 } //There seems to be an outlier here skewing the data higher, lets take a look
-ta DistrictName2 if ExpPerPupil2016_17>25000
-// Asbury Park City school district seems to be the outlier, for some reason they spend quite a large amount per student on average in their school districts.
+ta DistrictNameN if ExpPerPupil2016_17>25000 & Abbot_SchoolDist==1
+// Asbury Park City school district seems to be the outlier, for some reason they spend quite a large amount per student on average in their school districts. This skews the data. Probably will be different if we were to drop that data point from our graph. Lets try.
+drop if ExpPerPupil2016_17>25000 & Abbot_SchoolDist==1
+// If we run line 532-536 again we see a much weaker correlation.
+
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' ExpPerPupil2017_18, msize(vsmall))(lfit `v' ExpPerPupil2017_18), ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures`v',replace)
+tw (scatter `v' ExpPerPupil2017_18, msize(vsmall))(lfit `v' ExpPerPupil2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures`v'_`a',replace)
+}
 } // Again we see the outlier Asbury Park City here. Slight positive correlations here, the data seems to be loosely scattered.
 
-//Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there negative correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight.
+//Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there positive correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight.
 
 *______________________________________________________________________________*
 **Smoking Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' AdultSmoking2016_17, msize(vsmall))(lfit `v' AdultSmoking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2016-2017 School Year) name(Smoking`v',replace)
+tw (scatter `v' AdultSmoking2016_17, msize(vsmall))(lfit `v' AdultSmoking2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2016-2017 School Year) name(Smoking`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' AdultSmoking2017_18, msize(vsmall))(lfit `v' AdultSmoking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking`v',replace)
+tw (scatter `v' AdultSmoking2017_18, msize(vsmall))(lfit `v' AdultSmoking2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking`v'_`a',replace)
 }
-
+}
 // The percentage population of smokers in a community does seem to have a negative impact on student outcomes overall, with a strange instance of it a relationship in the 2017-2018 school year. As the percent population smoking increases, so does math test scores.
 
 *______________________________________________________________________________*
 **Obesity Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' AdultObesity2016_17, msize(vsmall))(lfit `v' AdultObesity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity`v',replace)
+tw (scatter `v' AdultObesity2016_17, msize(vsmall))(lfit `v' AdultObesity2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' AdultObesity2017_18, msize(vsmall))(lfit `v' AdultObesity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity`v',replace)
+tw (scatter `v' AdultObesity2017_18, msize(vsmall))(lfit `v' AdultObesity2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity`v'_`a',replace)
 }
-
+}
 //Strong negative correlations across the board here. It presents the neccessity for more research on the individual health of each school districts students and their families. Also opens up a study for what these school districts are providing their students for food during the school day. Many are most likely on free or reduced lunch, and many school lunch services are privatized. Do privatized lunch services have a negative effect on a students health/learning outcomes?
 
 *______________________________________________________________________________*
 **Physical Inactivity Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' PhysicalInactivity2016_17, msize(vsmall))(lfit `v' PhysicalInactivity2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2016-2017 School Year) name(Inactivity`v',replace)
+tw (scatter `v' PhysicalInactivity2016_17, msize(vsmall))(lfit `v' PhysicalInactivity2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2016-2017 School Year) name(Inactive`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' PhysicalInactivity2017_18, msize(vsmall))(lfit `v' PhysicalInactivity2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactivity`v',replace)
+tw (scatter `v' PhysicalInactivity2017_18, msize(vsmall))(lfit `v' PhysicalInactivity2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactive`v'_`a',replace)
 }
-
+}
 //Again, negative correlations across the board here, yet slightly less so than the relationship between test scores and obesity. Perhaps during the periods of inactivity they're doing school related activities.
 
 *______________________________________________________________________________*
 **Excessive Drinking Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' ExcessiveDrinking2016_17, msize(vsmall))(lfit `v' ExcessiveDrinking2016_17), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking`v',replace)
+tw (scatter `v' ExcessiveDrinking2016_17, msize(vsmall))(lfit `v' ExcessiveDrinking2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' ExcessiveDrinking2017_18, msize(vsmall))(lfit `v' ExcessiveDrinking2017_18), ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking`v',replace)
+tw (scatter `v' ExcessiveDrinking2017_18, msize(vsmall))(lfit `v' ExcessiveDrinking2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking`v'_`a',replace)
 }
-
+}
 //Strange positive correlations here. One would imagine as drinking of the population increases test schools of the surrounding students decrease. However some counties with the highest percentage of excess drinkers are some of the best performing. Further investigation is required to understand this relationship. 
 
 *______________________________________________________________________________*
 **Teen Birth Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' TeenBirths2016_17, msize(vsmall))(lfit `v' TeenBirths2016_17), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2016-2017 School Year) name(TeenBirths`v',replace)
+tw (scatter `v' TeenBirths2016_17, msize(vsmall))(lfit `v' TeenBirths2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2016-2017 School Year) name(TeenBirth`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' TeenBirths2017_18, msize(vsmall))(lfit `v' TeenBirths2017_18), ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirths_`v',replace)
+tw (scatter `v' TeenBirths2017_18, msize(vsmall))(lfit `v' TeenBirths2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirth`v'_`a',replace)
 }
-
+}
 // The data suggests that as teen pregenancy increase there is a decrease in test scores. This makes logical sense, teenage pregenancies usually take a toll on the ability to meet academic obligations in order to take care of a child leading to things like students failing or dropping out entirely. Interesting policy ideas here, perhaps a contraceptive campaign for students and the communities they operate in. 
 
 *______________________________________________________________________________*
 **Single Parent Household Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' SingleParentHouse2016_17, msize(vsmall))(lfit `v' SingleParentHouse2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent`v',replace)
+tw (scatter `v' SingleParentHouse2016_17, msize(vsmall))(lfit `v' SingleParentHouse2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' SingleParentHouse2017_18, msize(vsmall))(lfit `v' SingleParentHouse2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent`v',replace)
+tw (scatter `v' SingleParentHouse2017_18, msize(vsmall))(lfit `v' SingleParentHouse2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent`v'_`a',replace)
 }
-
+}
 // These graphs suggest that as the percentage of single parent households increase, student standardize test scores decrease. The relationship here is not a strong as I would have expected however, and possibly not as much of a policy concern for lawmakers.
 
 *______________________________________________________________________________*
 **Violent Crime Rate Relationship w/ Grades
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
-tw (scatter `v' ViolentCrime2016_17, msize(vsmall))(lfit `v' ViolentCrime2016_17), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2016-2017 School Year) name(Crime`v',replace)
+tw (scatter `v' ViolentCrime2016_17, msize(vsmall))(lfit `v' ViolentCrime2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2016-2017 School Year) name(Crime`v'_`a',replace)
 }
+}
+foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
-tw (scatter `v' ViolentCrime2017_18, msize(vsmall))(lfit `v' ViolentCrime2017_18), ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime`v',replace)
+tw (scatter `v' ViolentCrime2017_18, msize(vsmall))(lfit `v' ViolentCrime2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime`v'_`a',replace)
 }
-
+}
 //Unsurprisngly, as violent crime increaes in communities, test scores suffer. 
 
 *______________________________________________________________________________*
-**Distribution of Expenditures per Pupil amoung Abbot and Non-Abbot Schools // I could possibly break this into a branch right? 
-use Education_Data_TOTAL_2, clear
-keep if Abbot_SchoolDist==1
-keep if StudentGroup2==4
-
+**Distribution of Expenditures per Pupil amoung Abbot and Non-Abbot Schools
+foreach a in 0 1{
 foreach v in ExpPerPupil2016_17 ExpPerPupil2017_18{
-histogram `v', bin(15) start(10000) frequency fcolor(ltblue) lcolor(black) ytitle(Number of School Districts) xtitle(State Aid per Pupil) title(Abbot School District) name(Abbot`v',replace) 
+histogram `v' if Abbot_SchoolDist==`a', bin(15) start(10000) frequency fcolor(ltblue) lcolor(black) ytitle(Number of School Districts) xtitle(State Aid per Pupil) name(Funding`v'_`a',replace)
+}
 }
 // A quick visualization of the distribution of state aid per pupuil by Abbot School in the 2016-2017 and 2017-2018 School Year
-
-use Education_Data_TOTAL_2, clear
-keep if Abbot_SchoolDist==0 //Keeps only Non-Abbot Schools
-keep if StudentGroup2==4 //Keeps Districtwide Statistics
-
-foreach v in ExpPerPupil2016_17 ExpPerPupil2017_18{
-histogram `v', bin(15) start(10000) frequency fcolor(ltblue) lcolor(black) ytitle(Number of School Districts) xtitle(State Aid per Pupil) title(Non-Abbot School District) name(Non_Abbot`v',replace) 
-}
-
-gr combine Non_AbbotExpPerPupil2016_17 AbbotExpPerPupil2016_17, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2016-2017 SY) name(Expenditure_SidebySide2016_17,replace)
-gr combine Non_AbbotExpPerPupil2017_18 AbbotExpPerPupil2017_18, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2017-2018 SY) name(Expenditure_SidebySide2018_19,replace)
+ 
+gr combine FundingExpPerPupil2016_17_0 FundingExpPerPupil2016_17_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2016-2017 SY) name(Expenditure_SidebySide2016_17,replace)
+gr combine FundingExpPerPupil2017_18_0 FundingExpPerPupil2017_18_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2017-2018 SY) name(Expenditure_SidebySide2017_18,replace)
 //This fits the narrative, Abbot schools look to get more money on average than other non-Abbot schools.
 
 *______________________________________________________________________________*
 **Regression of varialbes.
 use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
-keep if StudentGroup2==4
+keep if StudentGroupN==4
 
-//per regressions see https://www.princeton.edu/~otorres/Regression101.pdf
+// Warning: Running this code many times will just continue to create the regressions but will not replace themselves. Do not run too many times.
 
 foreach v in PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 ExpPerPupil2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17{
 reg `v' ELADisPerf2016_17, robust
-outreg2 using myreg.doc, replace ctitle(`v') //no, this doesnt make sense, should be append not replace
-}
-//Runs regressions for all variables with ELA test scores in the 2016-2017 school year
+outreg2 using myreg.doc, append ctitle(`v')
+}//Runs regressions for all variables with ELA test scores in the 2016-2017 school year
 
 foreach v in PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 ExpPerPupil2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18{
 reg `v' ELADisPerf2017_18, robust
-outreg2 using myreg.doc, replace ctitle(`v')
-}
-//Runs regressions for all variables with ELA test scores in the 2017-2018 school year
+outreg2 using myreg.doc, append ctitle(`v')
+}//Runs regressions for all variables with ELA test scores in the 2017-2018 school year
 
 foreach v in PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 ExpPerPupil2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17{
 reg `v' MATHDisPerf2016_17, robust
-outreg2 using myreg.doc, replace ctitle(`v')
-}
-//Runs regressions for all variables with Math test scores in the 2016-2017 school year
+outreg2 using myreg.doc, append ctitle(`v')
+}//Runs regressions for all variables with Math test scores in the 2016-2017 school year
 
 foreach v in PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 ExpPerPupil2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18{
 reg `v' ELADisPerf2017_18, robust
-outreg2 using myreg.doc, replace ctitle(`v')
-}
-//Runs regressions for all variables with Math test scores in the 2017-2018 school year
+outreg2 using myreg.doc, append ctitle(`v')
+}//Runs regressions for all variables with Math test scores in the 2017-2018 school year
