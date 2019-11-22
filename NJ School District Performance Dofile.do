@@ -1,3 +1,14 @@
+/*
+good stuff, i'd focus now on research part, maybe read some scholarly literatire, say goog scholar abbot district nj:
+https://scholar.google.com/scholar?hl=en&as_sdt=0,31&q=abbott+district+nj
+and then you can be better with graphs and tables in substatntive sense: do stuff that that makes research sense
+this is not my area so i can't help much here, but i'd definitely talk to michael hayes, he specializes in education, 
+and he's stata afficionado too!
+and you may check out the hot stuff in the area:
+https://web.stanford.edu/~jhain/synthpage.html
+http://www.rajchetty.com/
+*/
+
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
@@ -382,9 +393,13 @@ foreach v in StudentGroup DistrictName CountyName{
 encode `v', gen(`v'N)
 } // Generates variable "StudentGroupN" "DistrictNameN" "CountyNameN" as same variable but with numeric values associated with each category //
 
+//i'm thinking depending on your research question and by all means not necessarily, could combine some of these categories
+//together on student group, especially those that are similar...
+
 drop CountyName CountyCode DistrictName StudentGroup ELAMetTar* ELAAnnTar* ELAStatePerf* ELAValidScores* MATHMetTar* MATHAnnTar* MATHStatePerf* MATHValidScores*
 order CountyNameN DistrictNameN Abbot_SchoolDist StudentGroupN ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
 
+//these labels a bit lengthy, could cut them by like 30%, so that when you do graphs or tables later they appear nicely 
 la var Abbot_SchoolDist "1=Abbott School 0=Non-Abbott School"
 la var StudentGroupN "Student Demographic"
 la var ELAParticPerc2017_18 "% Student Demographic Participation in ELA 2017-2018" 
