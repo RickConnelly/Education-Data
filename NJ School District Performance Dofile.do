@@ -1,27 +1,12 @@
-/*
-good stuff, i'd focus now on research part, maybe read some scholarly literatire, say goog scholar abbot district nj:
-https://scholar.google.com/scholar?hl=en&as_sdt=0,31&q=abbott+district+nj
-and then you can be better with graphs and tables in substatntive sense: do stuff that that makes research sense
-this is not my area so i can't help much here, but i'd definitely talk to michael hayes, he specializes in education, 
-and he's stata afficionado too!
-and you may check out the hot stuff in the area:
-https://web.stanford.edu/~jhain/synthpage.html
-http://www.rajchetty.com/
-*/
-
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
 
-// This research aims to examine the reimplementation of additional funding support for school districts after the 2011 decision in the NJ Supreme Court case Abbot v. Burke. These school districts are of extremely low socioeconomic status and thus have failing schools since school funding in New Jersey is tied to property value. Originally decided in 1985 these schools lost their additional funding in the wake of the recession, where the first cut in many state budgets were state aid to school districts. Once the economy began to recover Abbot v. Burke was reintroduced and such the original 31 school districts were regranted additional funding as a means to ensure the NJ consitutional right to a rigorous and thorough education.  
+// This research aims to examine the reimplementation of additional funding support for school districts after the 2011 decision in the NJ Supreme Court case Abbot v. Burke. These school districts are of extremely low socioeconomic status and thus have failing schools since school funding in New Jersey is tied to property value. Originally decided in 1985 these schools lost their additional funding in the wake of the recession, where the first cut in many state budgets were state aid to school districts. Once the economy began to recover Abbott v. Burke was reintroduced and such the original 31 school districts were regranted additional funding as a means to ensure the NJ consitutional right to a rigorous and thorough education.  
 
-// My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbot School Districts compared to non-Abott School Districts.
+// My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbott School Districts compared to non-Abbott School Districts.
 
 *______________________________________________________________________________*
-
-////////////////////////////////////////////////////////////////////////////////
-// **Beginning of PS1** ////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 clear // clears any prior data that could have already been loaded into Stata //
 set matsize 800 // Sets maximum number of variables in model to 800 //   
@@ -30,7 +15,6 @@ set more off // tells Stata to not pause and show -more message- //
 cap log close // Allows the .dofile to continue despite possible error messages //
 
 *______________________________________________________________________________*
-
 
 mkdir "C:\Users\rjc361\Desktop/Stata_data/" //Creates a working directory to a public computer CHANGE BEFORE EXECUTING DOFILE // 
 
@@ -43,7 +27,7 @@ log using log1, replace // Opens log //
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under MathParticpationPerform//
 
-drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+drop Subject ProfRateFederalAccountability
 
 ren ValidScores MATHValidScores2017_18
 ren ParticipationPercent MATHParticPerc2017_18
@@ -51,17 +35,16 @@ ren DistrictPerformance MATHDisPerf2017_18
 ren StatePerformance MATHStatePerf2017_18
 ren AnnualTarget MATHAnnTar2017_18
 ren MetTarget MATHMetTar2017_18
-// This renames each variable to designate data specific to Math test scores and by year //
 
 drop if CountyName == "CHARTERS"
 drop if CountyName == "State"
 // The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
 
-save NJ_MATH_2017_18, replace //Saves the data be later pulled to merge with English Language Arts Scores //
+save NJ_MATH_2017_18, replace 
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_ELA_2017_18.dta?raw=true", clear //This is the raw data on NJ ELA test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under ELALiteracyParticipationPerform//
 
-drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+drop Subject ProfRateFederalAccountability 
 
 ren ValidScores ELAValidScores2017_18
 ren ParticipationPercent ELAParticPerc2017_18
@@ -69,29 +52,24 @@ ren DistrictPerformance ELADisPerf2017_18
 ren StatePerformance ELAStatePerf2017_18
 ren AnnualTarget ELAAnnTar2017_18
 ren MetTarget ELAMetTar2017_18
-// This renames each variable to designate data specific to English Language Arts test scores and by year //
 
 drop if CountyName == "CHARTERS"
 drop if CountyName == "State"
-// The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
+// The purpose of this research is about Abbott Public School student achievement compared to NonAbbott Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
 
-save NJ_ELA_2017_18, replace // Saves the data be later pulled to merge with Math Scores //
+save NJ_ELA_2017_18, replace 
 
-merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_MATH_2017_18 // Merges Math Performance with ELA Performance Data for the 2017-2018 school year //
-drop _merge // drops variable created by merge command //
+merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_MATH_2017_18 
+drop _merge 
 
-save Education_Data_2017_2018, replace // This saves the merged ELA and MATH test scores for the school year 2017-2018 to be pulled later to merge with other data sets //
+save Education_Data_2017_2018, replace 
 
 *______________________________________________________________________________*
 * Similarly, in this section we're going to pull Math and English Language Arts Test scores from the 2016-2017 school year and merge them *
 
-////////////////////////////////////////////////////////////////////////////////
-// **Beginning of PS3** ////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 use "https://github.com/RickConnelly/Data/blob/master/NJ_ELA_2016_17.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2016-2017 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/16-17/DistrictPerformanceReports.xlsx under ELALiteracyParticipationPerform//
 
-drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+drop Subject ProfRateFederalAccountability 
 
 ren ValidScores ELAValidScores2016_17
 ren ParticipationPercent ELAParticPerc2016_17
@@ -99,17 +77,16 @@ ren DistrictPerformance ELADisPerf2016_17
 ren StatePerformance ELAStatePerf2016_17
 ren AnnualTarget ELAAnnTar2016_17
 ren MetTarget ELAMetTar2016_17
-// This renames each variable to designate data specific to English Language Arts test scores and by year//
 
 drop if CountyName == "CHARTERS"
 drop if CountyName == "State"
-// The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
+// The purpose of this research is about Abbott Public School student achievement compared to NonAbbott Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
 
-save NJ_ELA_2016_17, replace // Saves the data be later pulled to merge with Math Scores //
+save NJ_ELA_2016_17, replace 
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2016_17.dta?raw=true" //This is the raw data on NJ ELA test scores from the 2016-2017 school year uploaded from Github that was pulled directly from the NJ DOE The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/16-17/DistrictPerformanceReports.xlsx under MathParticpationPerform//
 
-drop Subject ProfRateFederalAccountability //Drops unneeded variables //
+drop Subject ProfRateFederalAccountability 
 
 ren ValidScores MATHValidScores2016_17
 ren ParticipationPercent MATHParticPerc2016_17
@@ -117,26 +94,25 @@ ren DistrictPerformance MATHDisPerf2016_17
 ren StatePerformance MATHStatePerf2016_17
 ren AnnualTarget MATHAnnTar2016_17
 ren MetTarget MATHMetTar2016_17
-// This renames each variable to designate data specific to Math test scores and by year //
 
 drop if CountyName == "CHARTERS"
 drop if CountyName == "State"
-// The purpose of this research is about Abbot Public School student achievement compared to NonAbbot Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
+// The purpose of this research is about Abbott Public School student achievement compared to NonAbbott Public School student achievement, to that end I'm dropping observations on Charter Schools and overall State statistics // 
 
-save NJ_MATH_2016_17, replace // Saves the data be later pulled to merge with Math Scores //
+save NJ_MATH_2016_17, replace 
 
-merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_ELA_2016_17 // Merges Math Performance with ELA Performance Data for the 2016-2017 school year //
-drop _merge // drops variable created by merge command //
+merge 1:1 CountyCode CountyName DistrictCode DistrictName StudentGroup using NJ_ELA_2016_17 
+drop _merge 
 
-save Education_Data_2016_2017, replace // This saves the merged ELA and MATH test scores for the school year 2017-2018 to be pulled later to merge with other data sets //
+save Education_Data_2016_2017, replace
 
 *______________________________________________________________________________*
 * In this section we are going to merge both school years worth of test scores into one dataset * 
 
 use Education_Data_2017_2018, clear
 
-merge 1:1 CountyName DistrictName StudentGroup using Education_Data_2016_2017 // Merges Math Performance with ELA Performance Data from BOTH school years //
-drop _merge // drops variable created by merge command //
+merge 1:1 CountyName DistrictName StudentGroup using Education_Data_2016_2017 
+drop _merge 
 
 save Education_Data_2_Years,replace
 // Here we have the merged data set for both school years on standardized test scores in both math and english language arts // 
@@ -149,13 +125,13 @@ save Education_Data_2_Years,replace
 
 use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2017_18.dta?raw=true", clear 
 
-ren StateLocal ExpPerPupil2017_18 // Renames the variable for proper identification //
+ren StateLocal ExpPerPupil2017_18
 
 drop if CountyName == "CHARTERS" 
 drop if CountyName == "State"
 // This drops unnecessary observations so the data merges properly //
 
-save Per_Pupil_Expenditures_2017_18, replace // saves the data to be merged later //
+save Per_Pupil_Expenditures_2017_18, replace
 
 use "https://github.com/RickConnelly/Data/blob/master/Per_Pupil_Expenditures_2016_17.dta?raw=true", clear
 
@@ -163,10 +139,8 @@ ren StateLocal ExpPerPupil2016_17
 ren COUNTY_NAME CountyName
 ren DISTRICT_NAME DistrictName
 drop DISTRICT_CODE DistrictCode Federal Total  
-// The data here was recorded differently in this year, a little extra code was needed to manipulate the data properly before merging //
 
 drop if CountyName == "CHARTERS"
-// This drops unnecessary observations so the data merges properly //
 
 save Per_Pupil_Expenditures_2016_17, replace
 
@@ -199,15 +173,15 @@ save Education_Data_2_Years_Cleaned, replace
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_Poverty_2016_17.dta?raw=true", clear
 
-keep if Tablewithcolumnheadersinrow == "NJ" //Only keeps observations that are NJ School Districts //
-drop Tablewithcolumnheadersinrow // Drops the name of the state, which is unncessary because we're only working with school districts in New Jersey, and we've already kept all NJ school districts in data set //
-drop B // Drops Postal Code, unncessary since cannot merge on this //
-drop C // Drops District ID, these District IDs do not match ones in data set, so we cannot merge on them, so we'll drop them
+keep if Tablewithcolumnheadersinrow == "NJ" 
+drop Tablewithcolumnheadersinrow 
+drop B 
+drop C 
 
-ren D DistrictName // Renames variable to DistrictName //
-ren E TotalPop2016_17 // Renames variable to the total population of the school district in the 2017-2018 school year //
-ren F TotalStudentPop2016_17 //Renames varialbe to the total population of students in each school district //
-ren G PovertyStudentPop2016_17 // Renames variable to the population of students per school district that live in poverty //
+ren D DistrictName 
+ren E TotalPop2016_17 
+ren F TotalStudentPop2016_17 
+ren G PovertyStudentPop2016_17 
 
 drop if DistrictName==DistrictName[_n-1] // This drops all repeats of a school district in this data set. From further investigation school districts that repeat are Fairfield Township School District, Franklin Township School District, Greenwich Township School District, Hamilton Township School District, Lawrence Township School District, Mansfield Township School District, Monroe Township School District, Ocean Township School District, Springfield Township School District, Union Township School District, and Washington Township School District. Refering to the codebook or any other material listed on the census website it is unclear why these school districts repeat. Since none of them are our primary focus we wil just keep one of each of them for merging purposes with the caveat these may not be the most accurate sources. Should later research questions involve these school districts contact to the census into why the repeats occur will be necessary. 
 
@@ -222,38 +196,38 @@ save NJ_Poverty_2016_17, replace
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_Poverty_2017_18.dta?raw=true", clear
 
-keep if Tablewithcolumnheadersinrow == "NJ" //Only keeps observations that are NJ School Districts //
-drop Tablewithcolumnheadersinrow // Drops the name of the state, which is unncessary because we're only working with school districts in New Jersey, and we've already kept all NJ school districts in data set //
-drop B // Drops Postal Code, unncessary since cannot merge on this //
-drop C // Drops District ID, these District IDs do not match ones in data set, so we cannot merge on them, so we'll drop them
+keep if Tablewithcolumnheadersinrow == "NJ"
+drop Tablewithcolumnheadersinrow
+drop B 
+drop C 
 
-ren D DistrictName // Renames variable to DistrictName //
-ren E TotalPop2017_18 // Renames variable to the total population of the school district in the 2017-2018 school year //
-ren F TotalStudentPop2017_18 //Renames varialbe to the total population of students in each school district //
-ren G PovertyStudentPop2017_18 // Renames variable to the population of students per school district that live in poverty //
+ren D DistrictName 
+ren E TotalPop2017_18 
+ren F TotalStudentPop2017_18 
+ren G PovertyStudentPop2017_18 
 
-drop if DistrictName==DistrictName[_n-1] // see line 201
+drop if DistrictName==DistrictName[_n-1] // see line 186
 
 destring *, replace
 
 gen prop=PovertyStudentPop2017_18/TotalStudentPop2017_18 * 100 // Controls for population //
-ren prop PercStudPovPop2017_18 // renames varialbe
+ren prop PercStudPovPop2017_18 
 
 save NJ_Poverty_2017_18, replace
 
 *_____________________________________________________________________________________________*
 
-use NJ_Poverty_2017_18, clear // Brings up data we cleaned above on poverty //
-merge 1:1 DistrictName using NJ_Poverty_2016_17 // Here we have four non-mergers We'll be dropping these as they have no impact on the data, as values were not recordered for them and they are not Abbot Schools //
+use NJ_Poverty_2017_18, clear 
+merge 1:1 DistrictName using NJ_Poverty_2016_17 // Here we have four non-mergers We'll be dropping these as they have no impact on the data, as values were not recordered for them and they are not Abbott Schools //
 drop if _merge==1 // Drops non-mergers mentioned above //
 drop if _merge==2 // Drops non-mergers mentioned above //
 
 generate str stock_prefix = substr(DistrictName, 1, strlen(DistrictName) - 16) // This deletes 16 characters in each observation in the District Name variable. This was done to increase the probabily the data here will merge properly with the master data set. // 
 replace stock_prefix =upper(stock_prefix) // This capitalizes all string observations in the DistrictName variable. This was done to increase the likeihood of a proper merge as all observations in DistrictName in the master data set are capitalized. //
-drop _merge // drops the generate merge variable that we do not need // 
-drop DistrictName // Drops the original DistrictName variable that was not manipulated //
-ren stock_prefix DistrictName // Renames the manipuated observation variable back to DistrictName //
-order DistrictName // Order the data to more easily visualize //
+drop _merge 
+drop DistrictName 
+ren stock_prefix DistrictName 
+order DistrictName 
 
 replace DistrictName = "EAST ORANGE" if DistrictName == "EAST ORANGE CITY"
 replace DistrictName = "KEANSBURG BORO" if DistrictName == "KEANSBURG BOROUGH"
@@ -262,7 +236,7 @@ replace DistrictName = "CITY OF ORANGE TWP" if DistrictName == "ORANGE CITY TOWN
 replace DistrictName = "PEMBERTON TWP" if DistrictName == "PEMBERTON TOWNSHIP"
 // We want to make sure that the Abbot Schools we want to study merge properly. To make sure that happens I have mannually changed the school district names that did not uniquely identify with the master data set and thus would not have merged. With these mannual changes each school we want to study will have the correct data associated with it. //
 
-save NJ_Poverty_Two_Years, replace // Saves the merged poverty data //
+save NJ_Poverty_Two_Years, replace 
 
 *_____________________________________________________________________________________________*
 
@@ -281,13 +255,13 @@ save Education_Data_Scores_Expenditures_Poverty, replace
 import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2017%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v2.xls", sheet("Ranked Measure Data") cellrange(A4:FF24) clear // Imports the excel directly from the County Health Rankings & Roadmaps, and pulls directly from the sheet titled Ranked Measure Data. //
 
 ren C CountyName
-ren AB AdultSmoking2016_17 // Percent of population (audlts) who smoke per county //
-ren AF AdultObesity2016_17 //Percent of population (adults) who are obsese per county //
-ren AL PhysicalInactivity2016_17 // Percent of population who are physically inactive per county //
-ren AR ExcessiveDrinking2016_17 // Percent of population who are excessive drinkers per county //
-ren BG TeenBirths2016_17 // Teen birth rate per county //
-ren DW SingleParentHouse2016_17 // Percentage of Single-Parent Households //
-ren EE ViolentCrime2016_17 // Violent Crime rate per county //
+ren AB AdultSmoking2016_17 
+ren AF AdultObesity2016_17 
+ren AL PhysicalInactivity2016_17 
+ren AR ExcessiveDrinking2016_17 
+ren BG TeenBirths2016_17 
+ren DW SingleParentHouse2016_17 
+ren EE ViolentCrime2016_17 
 
 keep CountyName AdultSmoking2016_17 AdultObesity2016_17 PhysicalInactivity2016_17 ExcessiveDrinking2016_17 TeenBirths2016_17 SingleParentHouse2016_17 ViolentCrime2016_17 // This keeps the variables we wish to merge into master dataset //
 
@@ -298,13 +272,13 @@ save Public_health_2016_17, replace
 import excel "https://www.countyhealthrankings.org/sites/default/files/state/downloads/2018%20County%20Health%20Rankings%20New%20Jersey%20Data%20-%20v3.xls", sheet ("Ranked Measure Data") cellrange(A4:FI24) clear
 
 ren C CountyName
-ren AE AdultSmoking2017_18 // Percent of population (audlts) who smoke per county //
-ren AI AdultObesity2017_18 //Percent of population (adults) who are obsese per county //
-ren AO PhysicalInactivity2017_18 // Percent of population who are physically inactive per county //
-ren AU ExcessiveDrinking2017_18 // Percent of population who are excessive drinkers per county //
-ren BH TeenBirths2017_18 // Number of Teen Births per county //
-ren DY SingleParentHouse2017_18 // Number of Single-Parent Households per county //
-ren EG ViolentCrime2017_18 // Number of Violent Crimes per county //
+ren AE AdultSmoking2017_18 
+ren AI AdultObesity2017_18 
+ren AO PhysicalInactivity2017_18 
+ren AU ExcessiveDrinking2017_18 
+ren BH TeenBirths2017_18 
+ren DY SingleParentHouse2017_18
+ren EG ViolentCrime2017_18 
 
 keep CountyName AdultSmoking2017_18 AdultObesity2017_18 PhysicalInactivity2017_18 ExcessiveDrinking2017_18 TeenBirths2017_18 SingleParentHouse2017_18 ViolentCrime2017_18 // This keeps the variables we wish to merge into master dataset
 
@@ -312,8 +286,8 @@ save Public_health_2017_18, replace
 
 *_____________________________________________________________________________________________*
 
-use Public_health_2016_17, clear // Loads the previously manipulated dataset //
-merge 1:1 CountyName using Public_health_2017_18 // Easy merge, simple 1 to 1 with no non-mergers. // 
+use Public_health_2016_17, clear 
+merge 1:1 CountyName using Public_health_2017_18 
 replace CountyName =upper(CountyName) // Makes all strings in County upper case to help with merge to master //
 drop _merge
 
@@ -330,27 +304,9 @@ drop _merge
 
 destring * ,ignore("*""**""N""Not Met""Met Target""Met Goal""Met Target†") replace 
 
-// I mannually cleaned each varialbe that had missing values in the form of "*" , "**" , and ".999" 
-//"*" == that data was available for too few students to report the given information, or the data represents a small percentage of students. There may be some additional cases where the data was kept private because the data could be used to potentially identify individual students. //
-// "**" ==  data was not available for the minimum 20 students, the required number for a student group to be included in New Jersey’s Every Student Succeeds Act ESS accountability system. //
-// ".999" == indicates that no data was available to report. This happens when there are no students enrolled in a particular student group or if no data was submitted by the district. //
-
 save Education_Data_TOTAL, replace // Saves the data under one name //
 
 *______________________________________________________________________________*
-* This section exports the data in several different formats, and closes the log then clears the data. *
-
-export excel using Education_Data_TOTAL,replace // Exports file into an Excel document //
-export delimited using Education_Data_TOTAL,replace // Exports file into delimited text //
-outfile using Education_Data_TOTAL,replace // Exports file into a debased file //
-// log close // Closes Log //
-clear //clears Stata //
-
-*______________________________________________________________________________*
-
-////////////////////////////////////////////////////////////////////////////////
-// **Beginning of PS2** ////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 use Education_Data_TOTAL, clear // Loads Data //
 
@@ -391,15 +347,11 @@ replace Abbot_SchoolDist=1 if DistrictName== "PLAINFIELD CITY"
 
 foreach v in StudentGroup DistrictName CountyName{
 encode `v', gen(`v'N)
-} // Generates variable "StudentGroupN" "DistrictNameN" "CountyNameN" as same variable but with numeric values associated with each category //
-
-//i'm thinking depending on your research question and by all means not necessarily, could combine some of these categories
-//together on student group, especially those that are similar...
+} 
 
 drop CountyName CountyCode DistrictName StudentGroup ELAMetTar* ELAAnnTar* ELAStatePerf* ELAValidScores* MATHMetTar* MATHAnnTar* MATHStatePerf* MATHValidScores*
-order CountyNameN DistrictNameN Abbot_SchoolDist StudentGroupN ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17  //orders data for easier visualization
+order CountyNameN DistrictNameN Abbot_SchoolDist StudentGroupN ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17 
 
-//these labels a bit lengthy, could cut them by like 30%, so that when you do graphs or tables later they appear nicely 
 la var Abbot_SchoolDist "1=Abbott School 0=Non-Abbott School"
 la var StudentGroupN "Student Demographic"
 la var ELAParticPerc2017_18 "% Student Demographic Participation in ELA 2017-2018" 
@@ -438,6 +390,14 @@ la var ViolentCrime2017_18 "Violent Crime Rates per County 2016-2017"
 save Education_Data_TOTAL_2, replace // Saves manipulated Data //
 
 *______________________________________________________________________________*
+* This section exports the data in several different formats, and closes the log then clears the data. *
+
+export excel using Education_Data_TOTAL,replace 
+export delimited using Education_Data_TOTAL,replace 
+outfile using Education_Data_TOTAL,replace 
+clear 
+
+*______________________________________________________________________________*
 * This section shows some descriptive statistics to better familiarize ourselves with the data. *
 
 use Education_Data_TOTAL_2, clear
@@ -452,11 +412,11 @@ sum `v',d
 *______________________________________________________________________________*
 * The purpose of this code is select a random sample to run descriptive statistics on. *
 
-use Education_Data_TOTAL_2, clear // Tells Stata to use manipulated Data // 
+use Education_Data_TOTAL_2, clear 
 
-keep ELADisPerf* MATHDisPerf* DistrictNameN StudentGroupN Abbot_SchoolDist //Tells Stata which varibles to keep //
+keep ELADisPerf* MATHDisPerf* DistrictNameN StudentGroupN Abbot_SchoolDist 
 keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
-order DistrictNameN StudentGroupN ELADisPerf* MATHDisPerf* Abbot_SchoolDist // Orders Data in an easily digestable manner //
+order DistrictNameN StudentGroupN ELADisPerf* MATHDisPerf* Abbot_SchoolDist 
 
 collapse ELADisPerf* MATHDisPerf* Abbot_SchoolD,by(DistrictNameN) 
 
@@ -465,9 +425,9 @@ bys DistrictNameN: sum *DisPerf* // This provides basic statistics on a random s
 *______________________________________________________________________________*
 *The purpose of this code is compare student achievement between Abbot Schools and Non-Abbot Schools in the 2017-2018 school year.*
 
-use Education_Data_TOTAL_2, clear // Reloads manipulated data //
+use Education_Data_TOTAL_2, clear 
 
-keep ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
+keep ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist 
 keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
 
 collapse  ELADisPerf2016_17 ELADisPerf2017_18 MATHDisPerf2016_17 MATHDisPerf2017_18 Abbot_SchoolD,by(DistrictNameN) // This collpases all demographics in each school district into the average standardized test scores for but ELA and Math with an Abbot school designation associated with each district shown in "Abbot_SchoolD".
@@ -480,41 +440,31 @@ ta DistrictNameN if MATHDisPerf2017_18<=11 // This details an investigation of a
 *______________________________________________________________________________*
 *This sections shows the district wide test scores for each demographic throughout each Abbot School. *
 
-use Education_Data_TOTAL_2, clear // Reloads manipulated data //
+use Education_Data_TOTAL_2, clear
 
 keep DistrictNameN StudentGroupN MATHDisPerf2016_17 MATHDisPerf2017_18 ELADisPerf2016_17 ELADisPerf2017_18 StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
 
-keep if Abbot_SchoolDist == 1 // Drops all Non-Abbot Schools
-drop Abbot_SchoolDist // Drops the numeric repsentation for an Abbot School //
+keep if Abbot_SchoolDist == 1 
+drop Abbot_SchoolDist 
 
 collapse ELADisPerf2017_18 MATHDisPerf2017_18 ELADisPerf2016_17 MATHDisPerf2016_17,by(StudentGroupN) // This shows how each demographic scored on standardized tests in Abbot Schools. On average, Black or African American students score lower on both math and reading than White students. Female students score signficantly higher than male students on the ELA portion of the test while male students score higher on the math portion than females. Interestingly, the demographic that scored the lowest are migrant students. Initally I had wondered if the reason behind this was that the tests were only administered in English. However, further research shows PARCC testing is adminstered in 10 languages suggesting the test was adminstered in the migrant student's native language. 
 
-// **Continuation of PS3** ////////////////////////////////////////////////////////
-
-reshape long ELADisPerf MATHDisPerf, i(StudentGroupN) j(Year) string // Reshapes data to long format  //
+reshape long ELADisPerf MATHDisPerf, i(StudentGroupN) j(Year) string 
 
 *______________________________________________________________________________*
 *This section shows the changes in aid over the two year period and reshapes the data. *
 
 use Education_Data_TOTAL_2, clear // Reloads manipulated data //
 
-keep ExpPerPupil2016_17 ExpPerPupil2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist // Tells Stata keep these specific variables //
+keep ExpPerPupil2016_17 ExpPerPupil2017_18 DistrictNameN StudentGroupN Abbot_SchoolDist 
 keep if StudentGroupN == 4 // This keeps only district wide scores, and removes demographic groups that would have miscalcuated results //
-keep if Abbot_SchoolDist == 1 // This tells Stata to keep only Abbot Schools
+keep if Abbot_SchoolDist == 1 
 
-drop Abbot_SchoolDist // Drops unnecessary variable //
-reshape long ExpPerPupil, i(DistrictNameN) j(Year) string //Reshapes data to long format //
-order DistrictNameN StudentGroupN Year ExpPerPupil // Orders the data //
+drop Abbot_SchoolDist 
+reshape long ExpPerPupil, i(DistrictNameN) j(Year) string 
+order DistrictNameN StudentGroupN Year ExpPerPupil 
 
 *______________________________________________________________________________*
-
-////////////////////////////////////////////////////////////////////////////////
-// **Beginning of PS4** ////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// For Problem Set 4 I began to work on the final project by organzing previous code to clean data and by simplifying where possible. From current graphs I have found interesting visualization from the data by demographics when comparing Abbot schools and Non-Abbot schools. Surpringly, though it is a limited viewed, an increase in state aid in Abbot schools does seem to positively correlate with student outcomes on standardizes testing. 
-
-//With the addition of the public health data it is clear there are many issues with the communities these school districts occupy as it relates to their health. Since extra spending in Abbot schools do seem to increase student outcomes it opens a wide variety of interesting policy opportunities to help students by tackling issues realted public health in these communities.  
 
 use Education_Data_TOTAL_2, clear
 
@@ -527,10 +477,6 @@ gr combine DemographicMATHDisPerf2017_18 DemographicELADisPerf2017_18 // In the 
 gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17 // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
-
-////////////////////////////////////////////////////////////////////////////////
-// **Beginning of PS5** ////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 **Student Poverty Rates Relationship w/ Grades
 use Education_Data_TOTAL_2, clear
@@ -684,24 +630,92 @@ use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
 keep if StudentGroupN==4
 
-// Warning: Running this code many times will just continue to create the regressions but will not replace themselves. Do not run too many times.
+reg ELADisPerf2016_17 ExpPerPupil2016_17
+outreg2 using ELA2016_2017.xls, replace
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17
+outreg2 using ELA2016_2017.xls, append 
+reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17
+outreg2 using ELA2016_2017.xls, append 
+//Runs regressions for all variables with ELA test scores in the 2016-2017 school year
 
-foreach v in PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 ExpPerPupil2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17{
-reg `v' ELADisPerf2016_17, robust
-outreg2 using myreg.doc, append ctitle(`v')
-}//Runs regressions for all variables with ELA test scores in the 2016-2017 school year
+reg ELADisPerf2017_18 ExpPerPupil2017_18
+outreg2 using ELA2017_2018.xls, replace
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18
+outreg2 using ELA2017_2018.xls, append 
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18
+outreg2 using ELA2017_2018.xls, append  
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18
+outreg2 using ELA2017_2018.xls, append 
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18
+outreg2 using ELA2017_2018.xls, append  
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18
+outreg2 using ELA2017_2018.xls, append  
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18
+outreg2 using ELA2017_2018.xls, append 
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18
+outreg2 using ELA2017_2018.xls, append  
+reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18
+outreg2 using ELA2017_2018.xls, append 
+}
+//Runs regressions for all variables with ELA test scores in the 2017-2018 school year
 
-foreach v in PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 ExpPerPupil2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18{
-reg `v' ELADisPerf2017_18, robust
-outreg2 using myreg.doc, append ctitle(`v')
-}//Runs regressions for all variables with ELA test scores in the 2017-2018 school year
+reg MATHDisPerf2016_17 ExpPerPupil2016_17
+outreg2 using MATH2016_2017.xls, replace
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17
+outreg2 using MATH2016_2017.xls, append 
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17
+outreg2 using MATH2016_2017.xls, append  
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17
+outreg2 using MATH2016_2017.xls, append  
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17
+outreg2 using MATH2016_2017.xls, append 
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17
+outreg2 using MATH2016_2017.xls, append  
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 
+outreg2 using MATH2016_2017.xls, append 
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17
+outreg2 using MATH2016_2017.xls, append 
+reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17
+outreg2 using MATH2016_2017.xls, append 
+//Runs regressions for all variables with Math test scores in the 2016-2017 school year
 
-foreach v in PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 ExpPerPupil2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17{
-reg `v' MATHDisPerf2016_17, robust
-outreg2 using myreg.doc, append ctitle(`v')
-}//Runs regressions for all variables with Math test scores in the 2016-2017 school year
+reg MATHDisPerf2017_18 ExpPerPupil2017_18
+outreg2 using MATH2017_2018.xls, replace
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18
+outreg2 using MATH2017_2018.xls, append 
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18
+outreg2 using MATH2017_2018.xls, append   
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18
+outreg2 using MATH2017_2018.xls, append  
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18
+outreg2 using MATH2017_2018.xls, append 
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18
+outreg2 using MATH2017_2018.xls, append   
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18
+outreg2 using MATH2017_2018.xls, append 
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18
+outreg2 using MATH2017_2018.xls, append  
+reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18
+outreg2 using MATH2017_2018.xls, append 
+//Runs regressions for all variables with Math test scores in the 2017-2018 school year
 
-foreach v in PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 ExpPerPupil2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18{
-reg `v' ELADisPerf2017_18, robust
-outreg2 using myreg.doc, append ctitle(`v')
-}//Runs regressions for all variables with Math test scores in the 2017-2018 school year
+*______________________________________________________________________________*
+**Final Analysis
+
+// Much of the literature surrounding allocating additional resources to disadvantaged schools in order to close the achievement gap has been subject to harsh critisms. This is mainly due to critics believing that these extra reources do not actually positively impact student achievement. Funding structures are mainly supported by federal and state dollars, and the methods that produce how much a school can spend per pupil are normally subjected to unforeseen variables and politics gaming the system. In many studies an increase in state or federal funding for disadvantaged schools shows no signficant rise in test scores. However, studies examing school finance structures and improving spending equity have shown that spending does in fact matter and does impact student achievement. 
+
+// My attempt with this research was to study the relationship between standardized test scores and per pupil expenditures while controlling for public health issues (crime rates, single parent households, obesity, etc.) that I thought were the most detrimental to these communities. I also wanted to test the relationship between test scores and these public health concerns to identify policy opportunities for the state of New Jersey in order to close the gap in student achievement between Abbott Schools and Non-Abbott Schools. From my results it appears holding public health concerns constant there is no statistical signficance on increases in per pupil expenditures on standardized test scores for Abbott schools in New Jersey. None of the regressions show that per pupil expenditures showed statistical signficance for the 2016-2017 and 2017-2018 school years in either Math or English Language Arts test scores. This was as expected from prior literature. Ultimately, by the Supreme Court mandate state aid was increased dramatically in order to provide equal funding across all schools. With that said, there is not much of a spending difference between Abbott school and non Abbott schools. This did not account for the drastic difference in socioeconomic status. It appears my hunch for using public health data as a proxy for low socioeconomic status was incorrect as well.
+
+// This research is admittedly very crude and riddled with limitations. Most notably, it's probably not the most appropriate to use county level data on health statistics when the primary unit of analysis is school districts. This made the data unwielding and difficult to use. The county level data does not accurate represent the variation in more specific communities found within each county. Additionally, I'm sure there are better regression models to use when studying the relationship between these variables. While the execution of this research does have its limitations these does seem to be a relationship between negative public health outcomes and student achivement outcomes. More robust research should be conducted to provide a better explanation of whether or not this relationship is casual. 
