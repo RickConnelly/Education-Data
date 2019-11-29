@@ -1,3 +1,9 @@
+//great graph interpretations!
+//But should interpret regressions overall after outreg
+//Best find some simple paper in your area from Google scholar that uses old regressions and see how they do interpretations and follow it and talk to Mike Hayes and yosmeriz, it's their area of research
+
+//And, not necessarily now, perhaps just for future research could merge in more data, as per substance and models, again, talk to Mike Hayes, it's his area
+
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
@@ -5,6 +11,9 @@
 // This research aims to examine the reimplementation of additional funding support for school districts after the 2011 decision in the NJ Supreme Court case Abbot v. Burke. These school districts are of extremely low socioeconomic status and thus have failing schools since school funding in New Jersey is tied to property value. Originally decided in 1985 these schools lost their additional funding in the wake of the recession, where the first cut in many state budgets were state aid to school districts. Once the economy began to recover Abbott v. Burke was reintroduced and such the original 31 school districts were regranted additional funding as a means to ensure the NJ consitutional right to a rigorous and thorough education.  
 
 // My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbott School Districts compared to non-Abbott School Districts.
+
+// Could beef up a bit especially with specifics such as hypotheses, models: dependent and independent vars, eg see https://github.com/jmcneese19/Problem-sets/blob/master/Week7-PS6HW.do
+//And lili, see for link in my email from couple days ago to listserv
 
 *______________________________________________________________________________*
 
