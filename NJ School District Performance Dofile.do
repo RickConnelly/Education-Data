@@ -1,9 +1,3 @@
-//great graph interpretations!
-//But should interpret regressions overall after outreg
-//Best find some simple paper in your area from Google scholar that uses old regressions and see how they do interpretations and follow it and talk to Mike Hayes and yosmeriz, it's their area of research
-
-//And, not necessarily now, perhaps just for future research could merge in more data, as per substance and models, again, talk to Mike Hayes, it's his area
-
 // Richard Connelly, Fall 2019 //
 // Data Management//
 // Professor: Dr. Adam Okulicz-Kozaryn//
@@ -12,8 +6,12 @@
 
 // My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbott School Districts compared to non-Abbott School Districts.
 
-// Could beef up a bit especially with specifics such as hypotheses, models: dependent and independent vars, eg see https://github.com/jmcneese19/Problem-sets/blob/master/Week7-PS6HW.do
-//And lili, see for link in my email from couple days ago to listserv
+// Using a multivariate regression model I will utlize student standardized test scores. These test scores will act as a crude metric for student achievement, and as such will act as my dependent variable. My independent varialbes including state aid per pupil and multiple public health indicators such as physical inactivity, obesity, crime rates, teenage birth rates, single parent households, etc.
+
+// There are three main questions I wish to answer with this research:
+// 1. Is there a positive relationship between the reinstated stat aid funding and standardized test scores? 
+// 2. Does poor public health affect standardized test score?
+// 3. If poor public health acts as indicator, which aspects of poor public public health are the most prominent? 
 
 *______________________________________________________________________________*
 
@@ -474,16 +472,31 @@ reshape long ExpPerPupil, i(DistrictNameN) j(Year) string
 order DistrictNameN StudentGroupN Year ExpPerPupil 
 
 *______________________________________________________________________________*
+*This section begins the visualization of the data
 
 use Education_Data_TOTAL_2, clear
 
+**Distribution of State Aid per Pupil amoung Abbot and Non-Abbot Schools
+foreach a in 0 1{
+foreach v in ExpPerPupil2016_17 ExpPerPupil2017_18{
+histogram `v' if Abbot_SchoolDist==`a', bin(15) start(10000) frequency fcolor(ltblue) lcolor(black) ytitle(Number of School Districts) xtitle(State Aid per Pupil for `a') name(Funding`v'_`a',replace)
+												  }
+				}
+// A quick visualization of the distribution of state aid per pupuil by Abbot School in the 2016-2017 and 2017-2018 School Year
+ 
+gr combine FundingExpPerPupil2016_17_0 FundingExpPerPupil2016_17_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2016-2017 SY) name(Expenditure_SidebySide2016_17,replace)
+gr combine FundingExpPerPupil2017_18_0 FundingExpPerPupil2017_18_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2017-2018 SY) name(Expenditure_SidebySide2017_18,replace)
+//This fits the narrative, Abbot schools look recieve money to offset the dismal amount they get from property tax value but overall they are similar to non-Abbott schools.
+
+*______________________________________________________________________________*
+** Demographics of students and how they test in Abbott and Non-Abbott Schools
 foreach v of varlist MATHDisPerf2017_18 MATHDisPerf2016_17 ELADisPerf2016_17 ELADisPerf2017_18{
 gr hbar (mean) `v', over(Abbot_SchoolDist, sort(`v') label(labsize(tiny))) over(StudentGroupN, label(labsize(tiny))) name(Demographic`v',replace)
 }
 //This shows each school years Math and ELA test scores (% met or exceeded expectations) side by side sorting on whether the school district is an Abbot Shool or not. 0 = Non-Abbot 1 = Abbot. The spread here is generally what we would expect. Abbot school are performing by and large lower than non-Abbot schools. There are some interesting caveats however. //
 
-gr combine DemographicMATHDisPerf2017_18 DemographicELADisPerf2017_18 // In the 2017-2018 school year American Indidan and Alaskan Native students tested better in both math and english language arts in Abbot schools than in non-Abbot schools. Students with disabilties tested better in ELA than their counterparts.
-gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17 // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
+gr combine DemographicMATHDisPerf2017_18 DemographicELADisPerf2017_18, title(Standardized Test scores by Demographic) name(Demographic_SidebySide2017_18,replace) // In the 2017-2018 school year American Indidan and Alaskan Native students tested better in both math and english language arts in Abbot schools than in non-Abbot schools. Students with disabilties tested better in ELA than their counterparts.
+gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17, title(Standardized Test scores by Demographic) name(Demographic_SidebySide2016_17,replace) // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
 
@@ -520,7 +533,7 @@ tw (scatter `v' ExpPerPupil2017_18, msize(vsmall))(lfit `v' ExpPerPupil2017_18) 
 }
 } // Again we see the outlier Asbury Park City here. Slight positive correlations here, the data seems to be loosely scattered.
 
-//Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there positive correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight.
+// QUESTION 1. -- Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there positive correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight. This is likely due to the outlier we observed early from Asbury Park City. Removing this observation shows a negative relationship as we expected from our review of the literature. However, though it is an isolated case, a drastic increase in state aid spending as we've observed with Asbury Park City warrents further investigation as an opportunity for additional research.
 
 *______________________________________________________________________________*
 **Smoking Relationship w/ Grades
@@ -548,7 +561,7 @@ foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' AdultObesity2017_18, msize(vsmall))(lfit `v' AdultObesity2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity`v'_`a',replace)
 }
 }
-//Strong negative correlations across the board here. It presents the neccessity for more research on the individual health of each school districts students and their families. Also opens up a study for what these school districts are providing their students for food during the school day. Many are most likely on free or reduced lunch, and many school lunch services are privatized. Do privatized lunch services have a negative effect on a students health/learning outcomes?
+//QUESTION 3. -- Obestiy is one of the strong correlating aspects of public health with standardized test scores. Strong negative correlations across the board here. It presents the neccessity for more research on the individual health of each school districts students and their families. Also opens up a study for what these school districts are providing their students for food during the school day. Many are most likely on free or reduced lunch, and many school lunch services are privatized. Do privatized lunch services have a negative effect on a students health/learning outcomes?
 
 *______________________________________________________________________________*
 **Physical Inactivity Relationship w/ Grades
@@ -590,7 +603,7 @@ foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' TeenBirths2017_18, msize(vsmall))(lfit `v' TeenBirths2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirth`v'_`a',replace)
 }
 }
-// The data suggests that as teen pregenancy increase there is a decrease in test scores. This makes logical sense, teenage pregenancies usually take a toll on the ability to meet academic obligations in order to take care of a child leading to things like students failing or dropping out entirely. Interesting policy ideas here, perhaps a contraceptive campaign for students and the communities they operate in. 
+// QUESTION 3. -- Teenage Birth Rates also seem to be one of the largest aspects of public health as they relate to test scores. The data suggests that as teen pregenancy increase there is a decrease in test scores. This makes logical sense, teenage pregenancies usually take a toll on the ability to meet academic obligations in order to take care of a child leading to things like students failing or dropping out entirely. Interesting policy ideas here, perhaps a contraceptive campaign for students and the communities they operate in. 
 
 *______________________________________________________________________________*
 **Single Parent Household Relationship w/ Grades
@@ -621,17 +634,8 @@ tw (scatter `v' ViolentCrime2017_18, msize(vsmall))(lfit `v' ViolentCrime2017_18
 //Unsurprisngly, as violent crime increaes in communities, test scores suffer. 
 
 *______________________________________________________________________________*
-**Distribution of Expenditures per Pupil amoung Abbot and Non-Abbot Schools
-foreach a in 0 1{
-foreach v in ExpPerPupil2016_17 ExpPerPupil2017_18{
-histogram `v' if Abbot_SchoolDist==`a', bin(15) start(10000) frequency fcolor(ltblue) lcolor(black) ytitle(Number of School Districts) xtitle(State Aid per Pupil) name(Funding`v'_`a',replace)
-}
-}
-// A quick visualization of the distribution of state aid per pupuil by Abbot School in the 2016-2017 and 2017-2018 School Year
- 
-gr combine FundingExpPerPupil2016_17_0 FundingExpPerPupil2016_17_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2016-2017 SY) name(Expenditure_SidebySide2016_17,replace)
-gr combine FundingExpPerPupil2017_18_0 FundingExpPerPupil2017_18_1, col(1) title(State Aid of Abbot and Non-Abbot Schools in 2017-2018 SY) name(Expenditure_SidebySide2017_18,replace)
-//This fits the narrative, Abbot schools look to get more money on average than other non-Abbot schools.
+
+// QUESTION 2. -- From the visualization of these graphs it appears there are negative relationships between public health. Running regressions between these variables will show how one affects the other and whether or not they are statistically signficant. 
 
 *______________________________________________________________________________*
 **Regression of varialbes.
