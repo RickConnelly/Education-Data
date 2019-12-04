@@ -4,14 +4,14 @@
 
 // This research aims to examine the reimplementation of additional funding support for school districts after the 2011 decision in the NJ Supreme Court case Abbot v. Burke. These school districts are of extremely low socioeconomic status and thus have failing schools since school funding in New Jersey is tied to property value. Originally decided in 1985 these schools lost their additional funding in the wake of the recession, where the first cut in many state budgets were state aid to school districts. Once the economy began to recover Abbott v. Burke was reintroduced and such the original 31 school districts were regranted additional funding as a means to ensure the NJ consitutional right to a rigorous and thorough education.  
 
-// My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, poverty rates per school district, and per pupil expenditures I will attempt to find any relationship between student achievement in Abbott School Districts compared to non-Abbott School Districts.
+// My attmempt with this code is examine whether or not this extra funding in the 2016-2017 and 2017-2018 school year has impacted student achievement to any degree compared to those not recieving additioanl funding. I expect to find that it has not meaningfully impacted student achievement as previous studies have not shown much change. However to my knowledge since the 2011 court ruling little research has been done into whether or not these school districts have exhibited any change other than the original findings. Using student test scores, per pupil expenditures, poverty rates per school district, and public health metrics I will attempt to find any relationship between student achievement in Abbott School Districts compared to non-Abbott School Districts.
 
-// Using a multivariate regression model I will utlize student standardized test scores. These test scores will act as a crude metric for student achievement, and as such will act as my dependent variable. My independent varialbes including state aid per pupil and multiple public health indicators such as physical inactivity, obesity, crime rates, teenage birth rates, single parent households, etc.
+// Using a regression model that controls for community and home inputs contrasting from most models which include only school inputs. I will utlize student standardized test scores. These test scores will act as a crude metric for student achievement, and as such will act as my dependent variable. My independent varialbes including state aid per pupil and multiple public health indicators such as physical inactivity, obesity, crime rates, teenage birth rates, single parent households, etc.
 
 // There are three main questions I wish to answer with this research:
-// 1. Is there a positive relationship between the reinstated stat aid funding and standardized test scores? 
+// 1. Is there a positive relationship between the reinstated state aid funding and standardized test scores? 
 // 2. Does poor public health affect standardized test score?
-// 3. If poor public health acts as indicator, which aspects of poor public public health are the most prominent? 
+// 3. If poor public health acts as indicator, which aspects of poor public health are the most prominent? 
 
 *______________________________________________________________________________*
 
@@ -354,7 +354,7 @@ replace Abbot_SchoolDist=1 if DistrictName== "PLAINFIELD CITY"
 
 foreach v in StudentGroup DistrictName CountyName{
 encode `v', gen(`v'N)
-} 
+												 } 
 
 drop CountyName CountyCode DistrictName StudentGroup ELAMetTar* ELAAnnTar* ELAStatePerf* ELAValidScores* MATHMetTar* MATHAnnTar* MATHStatePerf* MATHValidScores*
 order CountyNameN DistrictNameN Abbot_SchoolDist StudentGroupN ELAParticPerc2017_18 ELADisPerf2017_18 MATHParticPerc2017_18 MATHDisPerf2017_18 ExpPerPupil2017_18 MATHParticPerc2016_17 MATHDisPerf2016_17 ELAParticPerc2016_17 ELADisPerf2016_17 
@@ -473,8 +473,8 @@ order DistrictNameN StudentGroupN Year ExpPerPupil
 
 *______________________________________________________________________________*
 *This section begins the visualization of the data
-
 use Education_Data_TOTAL_2, clear
+keep if StudentGroupN==4 
 
 **Distribution of State Aid per Pupil amoung Abbot and Non-Abbot Schools
 foreach a in 0 1{
@@ -499,29 +499,27 @@ gr combine DemographicMATHDisPerf2017_18 DemographicELADisPerf2017_18, title(Sta
 gr combine DemographicMATHDisPerf2016_17 DemographicMATHDisPerf2016_17, title(Standardized Test scores by Demographic) name(Demographic_SidebySide2016_17,replace) // In the 2016-2017 school year again American Indian or Alaskan Native and Military-Connected students out performed their counterparts in non-Abott schools in math but not in ELA. Foster care students tested higher in english language arts in Abbot Schools than their counterparts, with students in foster care and Sudents with Disabilities performing substantially lower math and ELA than other demographics. //
 
 *______________________________________________________________________________*
-
 **Student Poverty Rates Relationship w/ Grades
 use Education_Data_TOTAL_2, clear
 foreach v of varlist MATHDisPerf2017_18 ELADisPerf2017_18{
 tw (scatter `v' PercStudPovPop2017_18, msize(vsmall))(lfit `v' PercStudPovPop2017_18), ytitle(% Met or Exceed Expectations) xtitle(% Student Population in Poverty) title(2017-2018 School Year) name(Poverty`v', replace)
-}
+														 }
 foreach v of varlist MATHDisPerf2016_17 ELADisPerf2016_17{
 tw (scatter `v' PercStudPovPop2016_17, msize(vsmall))(lfit `v' PercStudPovPop2016_17), ytitle(% Met or Exceed Expectations) xtitle(% Student Population in Poverty) title(2016-2017 School Year) name(Poverty`v', replace)
-}
+														 }
 
 gr combine PovertyMATHDisPerf2017_18 PovertyMATHDisPerf2016_17,col(1) title(Math Test Scores and Poverty) name(Poverty_MATH_SidebySide, replace)
 gr combine PovertyELADisPerf2017_18 PovertyELADisPerf2016_17,col(1) title(ELA Test Scores and Poverty) name(Poverty_ELA_SidebySide, replace) // Interestingly, we see more of a drop in math test scores with less student populations in poverty for the 2017-2018 school year whereas in the 2016-2017 school year we have higher populations per school district in poverty yet math test scores overall dropped less. However, it could be more populations fell into further into poverty and tested around the same as the year prior.
 
 *______________________________________________________________________________*
 **Expenditures per Pupil Relationship w/ Grades
-use Education_Data_TOTAL_2, clear
-keep if StudentGroupN==4 
 
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' ExpPerPupil2016_17, msize(vsmall))(lfit `v' ExpPerPupil2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2016-2017 School Year) name(Expenditures`v'_`a',replace)
-}
-} //There seems to be an outlier here skewing the data higher, lets take a look
+														 }
+				} 
+//There seems to be an outlier here skewing the data higher, lets take a look
 ta DistrictNameN if ExpPerPupil2016_17>25000 & Abbot_SchoolDist==1
 // Asbury Park City school district seems to be the outlier, for some reason they spend quite a large amount per student on average in their school districts. This skews the data. Probably will be different if we were to drop that data point from our graph. Lets try.
 drop if ExpPerPupil2016_17>25000 & Abbot_SchoolDist==1
@@ -530,8 +528,9 @@ drop if ExpPerPupil2016_17>25000 & Abbot_SchoolDist==1
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' ExpPerPupil2017_18, msize(vsmall))(lfit `v' ExpPerPupil2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Expenditures per Student by School District) title(2017-2018 School Year) name(Expenditures`v'_`a',replace)
-}
-} // Again we see the outlier Asbury Park City here. Slight positive correlations here, the data seems to be loosely scattered.
+													     }
+				} 
+// Slight positive correlations here, the data seems to be loosely scattered. Asbury Park City is not represnted in this graph, as they did not report test scores for the 2017-18 school year.
 
 // QUESTION 1. -- Overall the relationship between extra spending and standardize tests scores do not show a large correlation, but in none of the visualizations of this data are there positive correlations, meaning the extra funding does suggest an increase in test scores, even if it is slight. This is likely due to the outlier we observed early from Asbury Park City. Removing this observation shows a negative relationship as we expected from our review of the literature. However, though it is an isolated case, a drastic increase in state aid spending as we've observed with Asbury Park City warrents further investigation as an opportunity for additional research.
 
@@ -540,13 +539,13 @@ tw (scatter `v' ExpPerPupil2017_18, msize(vsmall))(lfit `v' ExpPerPupil2017_18) 
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' AdultSmoking2016_17, msize(vsmall))(lfit `v' AdultSmoking2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2016-2017 School Year) name(Smoking`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' AdultSmoking2017_18, msize(vsmall))(lfit `v' AdultSmoking2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Smoking Habits) title(2017-2018 School Year) name(Smoking`v'_`a',replace)
-}
-}
+														 }
+				}
 // The percentage population of smokers in a community does seem to have a negative impact on student outcomes overall, with a strange instance of it a relationship in the 2017-2018 school year. As the percent population smoking increases, so does math test scores.
 
 *______________________________________________________________________________*
@@ -554,13 +553,13 @@ tw (scatter `v' AdultSmoking2017_18, msize(vsmall))(lfit `v' AdultSmoking2017_18
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' AdultObesity2016_17, msize(vsmall))(lfit `v' AdultObesity2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2016-2017 School Year) name(Obesity`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' AdultObesity2017_18, msize(vsmall))(lfit `v' AdultObesity2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Adult Obesity) title(2017-2018 School Year) name(Obesity`v'_`a',replace)
-}
-}
+														 }
+				}
 //QUESTION 3. -- Obestiy is one of the strong correlating aspects of public health with standardized test scores. Strong negative correlations across the board here. It presents the neccessity for more research on the individual health of each school districts students and their families. Also opens up a study for what these school districts are providing their students for food during the school day. Many are most likely on free or reduced lunch, and many school lunch services are privatized. Do privatized lunch services have a negative effect on a students health/learning outcomes?
 
 *______________________________________________________________________________*
@@ -568,13 +567,13 @@ tw (scatter `v' AdultObesity2017_18, msize(vsmall))(lfit `v' AdultObesity2017_18
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' PhysicalInactivity2016_17, msize(vsmall))(lfit `v' PhysicalInactivity2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2016-2017 School Year) name(Inactive`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' PhysicalInactivity2017_18, msize(vsmall))(lfit `v' PhysicalInactivity2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population Physically Inactive) title(2017-2018 School Year) name(Inactive`v'_`a',replace)
-}
-}
+														 }
+				}
 //Again, negative correlations across the board here, yet slightly less so than the relationship between test scores and obesity. Perhaps during the periods of inactivity they're doing school related activities.
 
 *______________________________________________________________________________*
@@ -582,13 +581,13 @@ tw (scatter `v' PhysicalInactivity2017_18, msize(vsmall))(lfit `v' PhysicalInact
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' ExcessiveDrinking2016_17, msize(vsmall))(lfit `v' ExcessiveDrinking2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2016-2017 School Year) name(Drinking`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' ExcessiveDrinking2017_18, msize(vsmall))(lfit `v' ExcessiveDrinking2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Percent of Population that Excessively Drinks) title(2017-2018 School Year) name(Drinking`v'_`a',replace)
-}
-}
+														 }
+				}
 //Strange positive correlations here. One would imagine as drinking of the population increases test schools of the surrounding students decrease. However some counties with the highest percentage of excess drinkers are some of the best performing. Further investigation is required to understand this relationship. 
 
 *______________________________________________________________________________*
@@ -596,13 +595,13 @@ tw (scatter `v' ExcessiveDrinking2017_18, msize(vsmall))(lfit `v' ExcessiveDrink
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' TeenBirths2016_17, msize(vsmall))(lfit `v' TeenBirths2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2016-2017 School Year) name(TeenBirth`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' TeenBirths2017_18, msize(vsmall))(lfit `v' TeenBirths2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Teenage Birth Rates) title(2017-2018 School Year) name(TeenBirth`v'_`a',replace)
-}
-}
+														 }
+				}
 // QUESTION 3. -- Teenage Birth Rates also seem to be one of the largest aspects of public health as they relate to test scores. The data suggests that as teen pregenancy increase there is a decrease in test scores. This makes logical sense, teenage pregenancies usually take a toll on the ability to meet academic obligations in order to take care of a child leading to things like students failing or dropping out entirely. Interesting policy ideas here, perhaps a contraceptive campaign for students and the communities they operate in. 
 
 *______________________________________________________________________________*
@@ -610,13 +609,13 @@ tw (scatter `v' TeenBirths2017_18, msize(vsmall))(lfit `v' TeenBirths2017_18) if
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' SingleParentHouse2016_17, msize(vsmall))(lfit `v' SingleParentHouse2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2016-2017 School Year) name(SingleParent`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' SingleParentHouse2017_18, msize(vsmall))(lfit `v' SingleParentHouse2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(% Single-Parent Household) title(2017-2018 School Year) name(SingleParent`v'_`a',replace)
-}
-}
+														 }
+				}
 // These graphs suggest that as the percentage of single parent households increase, student standardize test scores decrease. The relationship here is not a strong as I would have expected however, and possibly not as much of a policy concern for lawmakers.
 
 *______________________________________________________________________________*
@@ -624,13 +623,13 @@ tw (scatter `v' SingleParentHouse2017_18, msize(vsmall))(lfit `v' SingleParentHo
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2016_17 MATHDisPerf2016_17{
 tw (scatter `v' ViolentCrime2016_17, msize(vsmall))(lfit `v' ViolentCrime2016_17) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2016-2017 School Year) name(Crime`v'_`a',replace)
-}
-}
+														 }
+				}
 foreach a in 0 1{
 foreach v of varlist ELADisPerf2017_18 MATHDisPerf2017_18{
 tw (scatter `v' ViolentCrime2017_18, msize(vsmall))(lfit `v' ViolentCrime2017_18) if Abbot_SchoolDist==`a', ytitle(% Met or Exceed Expectations) xtitle(Violent Crime Rates) title(2017-2018 School Year) name(Crime`v'_`a',replace)
-}
-}
+														 }
+				}
 //Unsurprisngly, as violent crime increaes in communities, test scores suffer. 
 
 *______________________________________________________________________________*
@@ -642,6 +641,9 @@ tw (scatter `v' ViolentCrime2017_18, msize(vsmall))(lfit `v' ViolentCrime2017_18
 use Education_Data_TOTAL_2, clear
 keep if Abbot_SchoolDist==1
 keep if StudentGroupN==4
+
+//I've run regressions below on Math and ELA test scores and their relationship with state aid in form of per pupil expenditures. My regression model includes two out of three forms of student inputs that I believe have impact on standradized test scores. The three inputs are as follows: School Inputs, Home Inputs, and Community Inputs. Most regression models only include school inputs such as teacher retention, defined as variables that affect student acheivement with which the school itself has control over such as quality of teaching faculty, and student to teacher ratios. I instead choose to on factors I believe past literature have given too little attention to, home inputs and community inputs. Similar to school inputs, these are variables that impact student achievement that families and the community as a whole have control over. 
+//Original regressions were difficult to interpret in a practical manner single per pupil expenditures were measured in single dollar increases. Since a single dollar increase is an impracitcal measurement for school funding I will multiply my expenditure variable by 1,000 when interpreting the regressions in thousand dollar increases.
 
 reg ELADisPerf2016_17 ExpPerPupil2016_17
 outreg2 using ELA2016_2017.xls, replace
@@ -661,7 +663,7 @@ reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_
 outreg2 using ELA2016_2017.xls, append 
 reg ELADisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17
 outreg2 using ELA2016_2017.xls, append 
-//Runs regressions for all variables with ELA test scores in the 2016-2017 school year
+//Running a regression with the variables expenditures per pupil and ELA test scores for the 2016-17 school year shows that we are 95 % a one thousand dollar increase in state aid funding will correspond with a 1.87% increase in the percent of students that meet or exceed expectations on English lanuage arts sections of standardized tests in Abbott school districts. This shows that 12.7% of the variation in ELA test scores can be explained by expenditures per pupil. Running the model with more variables shows that a one thousand dollar increase in state aid funding corresponds with a 0.937% increase in the percent of students that meet or exceed expectations on English lanuage arts sections of standardized tests in Abbott school districts. This interpetation however has no statistical signficance. My standard error on average is high, likely because my sample size is so small, noting a limitation of the research.
 
 reg ELADisPerf2017_18 ExpPerPupil2017_18
 outreg2 using ELA2017_2018.xls, replace
@@ -681,8 +683,7 @@ reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_
 outreg2 using ELA2017_2018.xls, append  
 reg ELADisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18
 outreg2 using ELA2017_2018.xls, append 
-}
-//Runs regressions for all variables with ELA test scores in the 2017-2018 school year
+//Running a regression with variables expenditures per pupil and ELA test scores for the 2017-18 school year shows that a one thousand dollar increase in state aid funding will correspond with a 1.36% increase in the percent of students that meet or exceed expectations on English language arts sections of the standardized tests in Abbott shool districts. The R squared shows me that this regression model expenditures per pupil does not explain any of the variation. Running the model with all my variables shows that a one thousand dollar increase in state aid funding corresponds with a 1.34% decrease in test scores at a 95% confidence interval. This is interesting, if correct (which I don't think it is, I must have made a mistake somewhere), it shows more funding being given to Abbott schools is actually harmful thought its not statistically significant. My standard error on average is high, likely because my sample size is so small, noting a limitation of the research.
 
 reg MATHDisPerf2016_17 ExpPerPupil2016_17
 outreg2 using MATH2016_2017.xls, replace
@@ -702,7 +703,7 @@ reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016
 outreg2 using MATH2016_2017.xls, append 
 reg MATHDisPerf2016_17 ExpPerPupil2016_17 PercStudPovPop2016_17 AdultObesity2016_17 AdultSmoking2016_17 PhysicalInactivity2016_17 TeenBirths2016_17 ViolentCrime2016_17 SingleParentHouse2016_17 ExcessiveDrinking2016_17
 outreg2 using MATH2016_2017.xls, append 
-//Runs regressions for all variables with Math test scores in the 2016-2017 school year
+//Running a regression with the variables expenditures per pupil and math test scores for the 2016-17 school year shows a one thousand dollar increase in state aid funding will correspond with a 1.42% increase in the percent of students that meet or exceed expectations on math sections of standardized tests in Abbott school districts  and is not statistically signficant. This shows that 8.7% of the variation in math test scores can be explained by expenditures per pupil. Running the model with more variables shows that a one thousand dollar increase in state aid funding corresponds with a 0.225% increase in the percent of students that meet or exceed expectations on math sections of standardized tests in Abbott school districts. This interpetation however has no statistical signficance. My standard error on average is high, likely because my sample size is so small, noting a limitation of the research.
 
 reg MATHDisPerf2017_18 ExpPerPupil2017_18
 outreg2 using MATH2017_2018.xls, replace
@@ -722,13 +723,13 @@ reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017
 outreg2 using MATH2017_2018.xls, append  
 reg MATHDisPerf2017_18 ExpPerPupil2017_18 PercStudPovPop2017_18 AdultObesity2017_18 AdultSmoking2017_18 PhysicalInactivity2017_18 TeenBirths2017_18 ViolentCrime2017_18 SingleParentHouse2017_18 ExcessiveDrinking2017_18
 outreg2 using MATH2017_2018.xls, append 
-//Runs regressions for all variables with Math test scores in the 2017-2018 school year
-
+//Running a regression with the variables expenditures per pupil and math test scores for the 2017-18 school year shows a one thousand dollar increase in state aid funding will correspond with a .14% increase in the percent of students that meet or exceed expectations on math sections of standardized tests in Abbott school districts and is not statistically signficant. This shows that virutally zero percent of the variation in math test scores can be explained by expenditures per pupil. Running the model with more variables shows that a one thousand dollar increase in state aid funding corresponds with a 0.944% decrease in the percent of students that meet or exceed expectations on math sections of standardized tests in Abbott school districts. This interpetation however has no statistical signficance. My standard error on average is high, likely because my sample size is so small, noting a limitation of the research.
+ 
 *______________________________________________________________________________*
 **Final Analysis
 
 // Much of the literature surrounding allocating additional resources to disadvantaged schools in order to close the achievement gap has been subject to harsh critisms. This is mainly due to critics believing that these extra reources do not actually positively impact student achievement. Funding structures are mainly supported by federal and state dollars, and the methods that produce how much a school can spend per pupil are normally subjected to unforeseen variables and politics gaming the system. In many studies an increase in state or federal funding for disadvantaged schools shows no signficant rise in test scores. However, studies examing school finance structures and improving spending equity have shown that spending does in fact matter and does impact student achievement. 
 
-// My attempt with this research was to study the relationship between standardized test scores and per pupil expenditures while controlling for public health issues (crime rates, single parent households, obesity, etc.) that I thought were the most detrimental to these communities. I also wanted to test the relationship between test scores and these public health concerns to identify policy opportunities for the state of New Jersey in order to close the gap in student achievement between Abbott Schools and Non-Abbott Schools. From my results it appears holding public health concerns constant there is no statistical signficance on increases in per pupil expenditures on standardized test scores for Abbott schools in New Jersey. None of the regressions show that per pupil expenditures showed statistical signficance for the 2016-2017 and 2017-2018 school years in either Math or English Language Arts test scores. This was as expected from prior literature. Ultimately, by the Supreme Court mandate state aid was increased dramatically in order to provide equal funding across all schools. With that said, there is not much of a spending difference between Abbott school and non Abbott schools. This did not account for the drastic difference in socioeconomic status. It appears my hunch for using public health data as a proxy for low socioeconomic status was incorrect as well.
+// My attempt with this research was to study the relationship between standardized test scores and per pupil expenditures while controlling for public health issues (crime rates, single parent households, obesity, etc.) that I thought were the most detrimental to these communities. I also wanted to test the relationship between test scores and these public health concerns to identify policy opportunities for the state of New Jersey in order to close the gap in student achievement between Abbott Schools and Non-Abbott Schools. From my results it appears holding public health concerns constant there is no statistical signficance on increases in per pupil expenditures on standardized test scores for Abbott schools in New Jersey. None of the regressions show that per pupil expenditures showed statistical signficance for the 2016-2017 and 2017-2018 school years in either Math or English Language Arts test scores. This was as expected from prior literature. Ultimately, by the Supreme Court mandate state aid was increased dramatically in order to provide equal funding across all schools. With that said, there is not much of a spending difference between Abbott school and non Abbott schools. This did not account for the drastic difference in socioeconomic status. It appears my hunch for using public health data as a proxy for low socioeconomic status was incorrect as well. This is likely due to my low sample size, which is one of my 
 
-// This research is admittedly very crude and riddled with limitations. Most notably, it's probably not the most appropriate to use county level data on health statistics when the primary unit of analysis is school districts. This made the data unwielding and difficult to use. The county level data does not accurate represent the variation in more specific communities found within each county. Additionally, I'm sure there are better regression models to use when studying the relationship between these variables. While the execution of this research does have its limitations these does seem to be a relationship between negative public health outcomes and student achivement outcomes. More robust research should be conducted to provide a better explanation of whether or not this relationship is casual. 
+// This research is admittedly very crude and riddled with limitations. Most notably, my sample size is incrediblty small, increasing the standard error. Also, it's probably not the most appropriate to use county level data on health statistics when the primary unit of analysis is school districts. This made the data unwielding and difficult to use. The county level data does not accurate represent the variation in more specific communities found within each county, and student level data on health metrics are simply not easy to acquire. I'm sure there are better regression models to use when studying the relationship between these variables. While the execution of this research does have its limitations these does seem to be a relationship between negative public health outcomes and student achivement outcomes. More robust research should be conducted to provide a better explanation of whether or not this relationship is casual. Additionally, for further research purposes I should include more school inputs, such as teacher experience, teacher to student ratio, etc. for more robust findings. In the future I should also incorporate District Factor Groups (DFG) that compare test scores on statewide assessments across demographically similar school districts, this would increase my sample size while still including Abbott School Districts and most likely produce more robust findings. 
