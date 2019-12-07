@@ -33,7 +33,7 @@ log using log1, replace // Opens log //
 * In this section we're going to pull Math and English Language Arts Test scores from the 2017-2018 school year and merge them *
 
 use "https://github.com/RickConnelly/Data/blob/master/NJ_MATH_2017_18.dta?raw=true", clear //This is the raw data on NJ Math test scores from the 2017-2018 school year uploaded from Github that was pulled directly from the NJ DOE. The direct link to the data can be found here: https://rc.doe.state.nj.us/ReportsDatabase/DistrictPerformanceReports.xlsx under MathParticpationPerform//
-
+ 
 drop Subject ProfRateFederalAccountability
 
 ren ValidScores MATHValidScores2017_18
